@@ -1,0 +1,5373 @@
+<!DOCTYPE html>
+<html lang='zh-Hant'>
+<head>
+<meta charset='UTF-8'>
+<title>RQE FINAL VERIFIED V3</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+body{font-family:"Segoe UI","Microsoft JhengHei", sans-serif;background:#f3f7f5;/* ✅ 整體背景顏色 */padding:4px 20px}
+input, textarea, button{font-family: "Segoe UI", "Microsoft JhengHei", sans-serif;}
+textarea{font-size: 15px;line-height: 1.6;}
+
+h1{
+  text-align:center;
+
+  font-size:30px;     /* ✅ 專案頁面標題控制大小 */
+  font-weight:650;    /* ✅ 控制粗細 */
+  margin-bottom:20px; /* ✅ 跟下面拉開距離 */
+}
+
+.board{
+  width: auto;
+  background: #ffffff;        /* ✅ 白色大框 */
+  border-radius: 14px;       /* ✅ 圓角 */
+  padding: 20px;             /* ✅ 內距 */
+  margin-top: 20px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);  /* ✅ 陰影 */
+  display: flex;
+  flex-direction: column;
+}
+
+.column{background:#fff;border-radius:12px;padding:10px;flex:1;min-width:0;max-height: 100%;overflow-y: auto;}
+
+.card{
+  background:#7a9e8e;
+  color:#1f2937;
+
+  padding:8px 10px;
+  margin:6px 0;
+  border-radius:8px;
+
+  display:flex;
+  justify-content:space-between;
+  align-items: flex-start;
+
+  min-height:30px;
+
+  /* ✅ 動畫 */
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+/* ✅  Hover 效果 */
+.card:hover{
+  transform: translateY(-3px);              /* ✅ 微浮起來 */
+  box-shadow: 0 6px 16px rgba(0,0,0,0.15);  /* ✅ 陰影 */
+  background:#6f9182;                       /* ✅ 微變深 */
+}
+
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;z-index:10000;}
+.box{width:90%;max-width:1800px;height:85vh;background:#fff;border-radius:12px;display:flex;position:relative}
+.close{position:absolute;top:8px;right:24px;font-size:18px;cursor:pointer;z-index: 9999;}
+.left{flex:2;padding:10px;overflow:auto}
+.right{flex:1;background:#f7f9ff;padding:10px;display: flex;flex-direction: column;overflow: hidden;}
+#gantt{flex: 1;overflow-x: auto;overflow-y: auto;min-height: 0;}
+
+.row{display:flex;gap:10px;flex-wrap:wrap;justify-content: center;}
+.item{
+  background: #eef5f2; /* ✅ item顏色 */
+  border-radius: 14px;
+  padding: 10px;
+  height: 50px;  
+  overflow: hidden;
+  width: 140px;         /* ✅ 變窄 */
+  max-width: 140px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  display: flex;
+  flex-direction: column;
+  align-items: center;      /* ✅ 水平置中 */
+  text-align: center;       /* ✅ 文字置中 */
+  gap: 1px;
+  transition: 0.2s;
+  position: relative;
+}
+
+.item:hover{
+  height: 90px;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+}
+.grid{display:grid;grid-template-columns:repeat(7,1fr)}
+.cell{font-size:10px;background:#f3f4f6;min-height:30px;padding:2px} /* ✅ 甘特圖 */
+.bar{font-size:10px;color:#fff;margin:1px;padding:2px;border-radius:4px}
+.arrow{text-align:center;font-size:18px}
+button,input{margin:3px;padding:5px;border-radius:6px;border:none}
+.item input{
+  width: 100px;  /* ✅ item名稱欄位 */  
+  height: 28px;    
+  padding: 4px 8px;  
+  font-size: 14px;
+  text-align: center; 
+}
+.item button{
+  background:#e3ece8;
+  border-radius:999px;
+
+  height: 22px;        
+  min-width: 32px;     
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;          
+  cursor:pointer;
+}
+.nav button{margin-right:5px}
+
+.nav button {
+  padding: 6px 14px;
+  border-radius: 8px;
+  background: #e5e7eb;
+  color: #374151;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+}
+
+.nav button.active {
+  background: #7a9e8e;
+  color: white;
+}
+
+.nav button:hover {
+  background: #d1d5db;
+}
+
+.global-title{
+  text-align: center;
+  font-size: 20px; /* ✅ 總甘特圖標題控制大小 */
+  font-weight: 650;
+  margin-bottom: 20px;
+}
+
+#global {
+  background: #ffffff; /* ✅ 總甘特圖背景 */
+  padding: 1px 16px 20px 16px; /* ✅ 上 右 下 左 */
+  border-radius: 14px;
+  margin-top: 40px; /* ✅ 專案和總甘特圖間距 */
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.item .del-btn{
+  position: static;
+  height: 22px;
+  min-width: 32px;
+  padding: 0;
+  font-size: 12px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #8faea0;
+}
+
+#weekly{
+  padding: 20px;              /* ✅ 內距 */
+  background: #ffffff;        /* ✅ 白底 */
+  border-radius: 14px;        /* ✅ 圓角 */
+  margin-top: 40px;           /* ✅ 跟上面拉開 */
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);  /* ✅ 陰影 */
+}
+
+.weekly-scroll{
+  overflow-x: auto;
+}
+
+/* ✅ 🦖 固定右上角 */
+#todoBtn{
+  position: fixed;
+  top: 20px;
+  right: 20px;
+
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+
+  background: #7a9e8e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 24px;
+  cursor: pointer;
+
+  z-index: 9999;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* ✅ hover 放大 */
+#todoBtn:hover{
+  transform: scale(1.1);
+}
+
+/* ✅ Todo 抽屜 */
+#todoPanel{
+  position: fixed;
+  top: 80px;
+  right: -450px;   /* ✅ 預設隱藏 */
+
+  width: 400px;
+  max-height: 600px;
+
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 12px;
+
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+
+  transition: 0.3s;
+  z-index: 9998;
+
+  display: flex;
+  flex-direction: column;
+}
+
+/* ✅ 打開 */
+#todoPanel.open{
+  right: 20px;
+}
+
+.action-bar{
+  display:flex;
+  gap:10px;
+}
+
+/* ✅ Add（主按鈕） */
+.btn-add{
+  background:#7a9e8e;
+  color:#fff;
+  border:none;
+
+  padding:6px 14px;
+  border-radius:999px;
+
+  font-size:14px;
+  font-weight:600;
+
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  gap:6px;
+
+  transition:0.15s ease;
+}
+
+/* ✅ hover */
+.btn-add:hover{
+  transform:scale(1.05);
+  box-shadow:0 4px 10px rgba(0,0,0,0.15);
+}
+
+/* ✅ Undo（次按鈕） */
+.btn-undo{
+  background:#e5e7eb;
+  color:#374151;
+
+  border:none;
+  padding:6px 14px;
+  border-radius:999px;
+
+  font-size:14px;
+  font-weight:600;
+
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  gap:6px;
+
+  transition:0.15s ease;
+}
+
+/* ✅ hover */
+.btn-undo:hover{
+  background:#d1d5db;
+  transform:scale(1.03);
+}
+
+.status-select{
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  background: #f3f4f6;
+  border: none;
+  border-radius: 8px;
+
+  padding: 4px 28px 4px 10px;
+
+  font-size: 12px;
+  font-weight: 500;
+  color: #374151;
+
+  cursor: pointer;
+  outline: none;
+
+  background-image: url("data:image/svg+xml;utf8,<svg fill='%236b7280' height='10' viewBox='0 0 20 20' width='10' xmlns='http://www.w3.org/2000/svg'><path d='M5 7l5 5 5-5z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+}
+
+.status-select:hover{
+  background: #e5e7eb;
+}
+
+.status-select:focus{
+  box-shadow: 0 0 0 2px rgba(122,158,142,0.4);
+}
+
+/* ✅ ✅ 💬 icon 控制（新增） */
+.note-btn{
+  opacity: 0;
+  transition: 0.2s;
+}
+
+.item:hover .note-btn{
+  opacity: 1;
+}
+
+/* ✅ ✅ 浮動便利貼 */
+
+.note-popup{
+  position: fixed;
+
+  max-width: 220px;
+  min-width: 160px;
+
+  background: #FFF7CC;  /* ✅ 柔和黃 */
+  border-radius: 12px;
+
+  padding: 8px 10px;
+
+  box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+
+  z-index: 99999;
+
+  font-size: 12px;
+}
+
+/* ✅ 小尾巴 */
+
+.note-popup::before{
+  content:'';
+  position:absolute;
+
+  left:-6px;      /* ✅ 從左邊伸出去 */
+  top:14px;       /* ✅ 微調對準item */
+
+  width:0;
+  height:0;
+
+  border-top:6px solid transparent;
+  border-bottom:6px solid transparent;
+  border-right:6px solid #FFF7CC;
+}
+
+.note-popup textarea{
+  width:100%;
+  min-height:40px;
+  max-height:120px;
+
+  border:none;
+  outline:none;
+  resize:none;
+
+  background:transparent;
+
+  font-size:12px;
+  line-height:1.4;
+}
+
+.note-popup-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-size:12px;
+  font-weight:600;
+  color:#555;
+}
+
+.note-popup-close{
+  cursor:pointer;
+  font-size:12px;
+}
+
+@keyframes fadeIn{
+  from{opacity:0; transform:translateY(-6px);}
+  to{opacity:1; transform:translateY(0);}
+}
+
+.fade-out{
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.fade-in{
+  opacity: 1;
+  transition: opacity 0.2s ease;
+}
+#loginPage{
+position:fixed;
+inset:0;
+display:flex;
+justify-content:center;
+align-items:center;
+background:#f3f7f5;
+z-index:999999;
+}
+
+.login-card{
+background:white;
+width:360px;
+padding:30px;
+border-radius:14px;
+box-shadow:0 2px 10px rgba(0,0,0,0.05);
+display:flex;
+flex-direction:column;
+gap:12px;
+}
+
+.login-card input{
+padding:10px;
+border-radius:8px;
+border:1px solid #ddd;
+}
+
+.login-card button{
+background:#7a9e8e;
+color:white;
+padding:10px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+}
+</style>
+</head>
+<body>
+
+<!-- Login Page -->
+<div id="loginPage">
+
+  <div class="login-card">
+
+    <h1>RQE Project Management System</h1>
+
+    <input
+      id="loginEmail"
+      type="email"
+      placeholder="Email"
+    >
+
+    <input
+      id="loginPassword"
+      type="password"
+      placeholder="Password"
+    >
+
+    <button id="loginBtn">
+      Login
+    </button>
+
+  </div>
+
+</div>
+
+<!-- 原本系統 -->
+<div id="app" style="display:none;">
+
+<h1>RQE Project Management System</h1>
+
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+  <!-- ✅ 左邊 -->
+
+<div class="action-bar">
+  <button class="btn-add" onclick='openAddProjectModal()'>
+    ＋ Add project
+  </button>
+
+  <button class="btn-undo" onclick="undoDelete()">
+    ↩ Undo delete
+  </button>
+</div>
+
+</div>
+<div class='board'>
+</div>
+<div id='weekly'></div>
+<div id='global'></div>
+<div class='modal' id='modal'>
+<div class='box'>
+<div class='close' onclick='closeModal()'>✖</div>
+<div class='left'>
+<div class='nav'>
+<button id="btnBg" onclick='mode="bg";renderProject()'>Background</button>
+<button id="btnInfo" onclick='mode="info";renderProject()'>Product Info</button>
+<button id="btnPlan" onclick='mode="plan";renderProject()'>Plan</button>
+<button id="btnFT" onclick='mode="ft";renderProject()'>FT time</button>
+<button id="btnNote" onclick='mode="note";renderProject()'>Note</button>
+</div>
+<div id='content'></div>
+</div>
+<div class='right'>
+<div id='gantt'></div>
+</div>
+</div>
+</div>
+<script>
+let db = [];
+let dragIndex = null;
+const COLS =
+'0.6fr 0.9fr 2.2fr 1.2fr 0.6fr 1fr 1.3fr 0.8fr auto auto';
+let activeNoteItems = new Set();
+let activeNoteElement = null;
+let activePopup = null;
+
+// ✅ BL color DB（會記住顏色）
+let BL_COLOR_MAP = JSON.parse(localStorage.getItem('BL_COLOR_MAP') || '{}');
+
+// ✅ 調色盤
+const BL_COLOR_POOL = [
+  '#7A9E8E',
+  '#BCBD8B',
+  '#373D20',
+  '#FFE787',
+  '#9DBBAE',
+  '#769FB6',
+  '#F2BB05',
+  '#124E78',
+  '#A36F5C',
+  '#C97D60',
+  '#E3A857',
+  '#D6CFA3',
+  '#6F8F72',
+  '#5B7F95',
+  '#3E6B73',
+  '#8C6F9E',
+  '#B7A0C9',
+  '#8DA7A0'
+];
+
+let filters = {
+  requester: [],
+  bl: [],
+  packageType: [],
+  type: [],
+  status: []
+};
+
+let kanbanMode = 'active'; 
+// active = todo + doing
+// history = done only
+
+function passFilter(p){
+
+  let requester = p.info?.['requester'] || '-';
+  let bl = p.info?.['BL'] || '-';
+  let typeName = p.info?.['type name'] || '-';
+  let packageType = p.info?.['package type'] || '-';
+
+  if(filters.project?.length && !filters.project.includes(p.name)) return false;
+  if(filters.requester.length && !filters.requester.includes(requester)) return false;
+  if(filters.bl.length && !filters.bl.includes(bl)) return false;
+
+  if(filters.packageType?.length){
+    let pkgList = (packageType || '')
+      .split(',')
+      .map(s => s.trim())
+      .filter(s => s);
+
+    if(!pkgList.some(p => filters.packageType.includes(p))){
+      return false;
+    }
+  }
+
+  let typeList = splitTypeNames(typeName);
+  if(filters.type.length && !typeList.some(t => filters.type.includes(t))) return false;
+  if(filters.status.length && !filters.status.includes(p.status)) return false;
+
+  return true;
+}
+function getSystemValue(project, targetLabel){
+
+if(!project?.noteData?.system){
+    return '';
+}
+
+let row = project.noteData.system.find(item =>
+    item.text &&
+    item.text.startsWith(targetLabel + ':')
+);
+
+if(!row){
+    return '';
+}
+
+return row.text
+    .substring((targetLabel + ':').length)
+    .trim();
+}
+
+function getBLColor(bl){
+
+  if(!bl || bl === '-') return '#7a9e8e';
+
+  // ✅ 已存在 → 直接用
+  if(BL_COLOR_MAP[bl]){
+    return BL_COLOR_MAP[bl];
+  }
+
+  // ✅ 新 BL → 分配顏色
+  let usedColors = Object.values(BL_COLOR_MAP);
+
+  let color = BL_COLOR_POOL.find(c => !usedColors.includes(c));
+
+  // ✅ 如果顏色用完 → 隨機 fallback
+  if(!color){
+    color = BL_COLOR_POOL[Math.floor(Math.random() * BL_COLOR_POOL.length)];
+  }
+
+  BL_COLOR_MAP[bl] = color;
+
+  // ✅ 存起來（關鍵🔥）
+  localStorage.setItem('BL_COLOR_MAP', JSON.stringify(BL_COLOR_MAP));
+
+  return color;
+}
+
+function openAddProjectModal(){
+
+  let name = prompt("Enter project name");
+
+  if(!name) return;
+
+  addProjectWithName(name);
+
+}
+
+function splitTypeNames(str){
+  if(!str) return ['-'];
+
+  return str
+    .split(',')
+    .map(s => s.trim())
+    .filter(s => s);
+}
+
+function parseLocalDate(dateStr){
+  if(!dateStr) return null;
+
+  let [y, m, d] = dateStr.split('-').map(Number);
+
+  return new Date(y, m - 1, d); // ✅ 用本地時間
+}
+
+function getCurrentWeekNumber() {
+  let today = new Date();
+
+  // ISO week（標準週數算法）
+  let temp = new Date(today.getTime());
+
+  // 調整到該週的星期四（ISO規則）
+  temp.setDate(temp.getDate() + 4 - (temp.getDay() || 7));
+
+  let yearStart = new Date(temp.getFullYear(), 0, 1);
+
+  let weekNo = Math.ceil((((temp - yearStart) / 86400000) + 1) / 7);
+
+  return weekNo;
+}
+
+let cur=null,mode='info';
+let lastDeletedProject = null;
+let flowScrollMemory = 0;
+let undoStack = [];
+let currentMonth = new Date();
+let currentYear = new Date().getFullYear(); 
+let ganttYear = new Date().getFullYear()
+
+async function save(){
+
+async function save(){
+
+  if(!window.currentUser) return;
+
+  try{
+
+    await window.setDoc(
+      window.doc(
+        window.firestore,
+        "users",
+        window.currentUser.uid
+      ),
+      {
+        projectData: JSON.stringify(db),
+        updatedAt: new Date().toISOString()
+      }
+    );
+
+    console.log("✅ Firestore Saved");
+
+  }catch(err){
+    console.error(
+      "Firestore Save Failed",
+      err
+    );
+  }
+}
+
+  if(!window.currentUser) return;
+
+  try{
+
+    await window.setDoc(
+
+      window.doc(
+        window.firestore,
+        "users",
+        window.currentUser.uid
+      ),
+
+{
+  projectData: JSON.stringify(db),
+  updatedAt: new Date().toISOString()
+}
+
+    );
+
+    console.log("✅ Firestore Saved");
+
+  }catch(err){
+
+    console.error(
+      "Firestore Save Failed",
+      err
+    );
+
+  }
+
+}
+
+function closeModal(){
+
+  activePopup = null;
+  activeNoteElement = null;
+
+  // ❗ 不要清 activeNoteItem（這樣下次會 reopen）
+
+  save();
+  modal.style.display='none';
+  renderGlobal();
+  renderWeekly();
+}
+
+
+function addProjectWithName(name){
+
+  if(!name) return;
+
+  const PROJECT_COLORS = [
+    '#7A9E8E',
+    '#6E8CA0',
+    '#C2A38D',
+    '#8F9B8E',
+    '#B4A69C',
+    '#9AA8A3'
+  ];
+
+  db.push({
+    name: name,
+    status:'todo',
+    color: PROJECT_COLORS[db.length % PROJECT_COLORS.length],
+
+    info:{
+      'requester':'',
+      'PE / TE / LTE owner':'',
+      'type name':'',
+      'nick name':'',
+      'package type':'',
+      'MAG':'',
+      'PL':'',
+      'BL':'',
+      'SOT':'',
+      'IO account':'',
+      'Tester / Handler':''
+    },
+
+    layers:[],
+    ft:[]
+  });
+  let newIndex = db.length - 1; 
+  save();
+  render();
+  renderGlobal();
+  renderWeekly();
+  openP(newIndex); 
+}
+
+function render(){
+
+let board = document.querySelector('.board');
+board.innerHTML = '';  // ✅ 清空畫面
+
+let header = document.createElement('div');
+
+header.style.display = 'grid';
+header.style.gridTemplateColumns = COLS;
+header.style.fontWeight = '600';
+header.style.padding = '6px 12px';
+header.style.color = '#6b7280'; // 淡灰
+header.style.borderBottom = '1px solid #e5e7eb';
+header.style.alignItems = 'center';
+header.style.justifyItems = 'center';
+
+let h1 = document.createElement('div');
+h1.style.display = 'flex';
+h1.style.alignItems = 'center';
+h1.style.gap = '4px';
+
+let projLabel = document.createElement('span');
+projLabel.textContent = 'Project';
+
+let projArrow = document.createElement('span');
+projArrow.textContent = '▼';
+
+projArrow.style.display = 'inline-flex';
+projArrow.style.alignItems = 'center';
+projArrow.style.justifyContent = 'center';
+projArrow.style.width = '26px';
+projArrow.style.height = '26px';
+projArrow.style.borderRadius = '6px';
+projArrow.style.cursor = 'pointer';
+projArrow.style.fontSize = '12px';
+projArrow.style.color = '#6b7280';
+
+projArrow.onclick = (e)=>{
+  e.stopPropagation();
+
+  let oldMenu = document.getElementById('filterMenu');
+  if(oldMenu){
+    oldMenu.remove();
+    return;
+  }
+
+  let values = [...new Set(
+    db.map(p => p.name || '-')
+  )];
+
+  let menu = createFilterMenu(
+    values,
+    filters.project || [],
+    (val)=>{
+      filters.project = val;
+      render();
+renderWeekly();
+renderGlobal();
+    }
+  );
+
+  menu.id = 'filterMenu';
+
+  document.body.appendChild(menu);
+
+  let rect = projArrow.getBoundingClientRect();
+
+menu.style.left = (rect.left + window.scrollX) + 'px';
+menu.style.top = (rect.bottom + window.scrollY + 4) + 'px';
+
+};
+
+h1.append(projLabel, projArrow);
+
+let h2 = document.createElement('div');
+h2.style.display = 'flex';
+h2.style.alignItems = 'center';
+h2.style.gap = '4px';
+
+// ✅ 文字（不會點）
+let label = document.createElement('span');
+label.textContent = 'Requester';
+
+// ✅ ▼箭頭（可點）
+let arrow = document.createElement('span');
+arrow.textContent = '▼';
+arrow.style.display = 'inline-flex';
+arrow.style.alignItems = 'center';
+arrow.style.justifyContent = 'center';
+
+arrow.style.width = '26px';
+arrow.style.height = '26px';
+
+arrow.style.borderRadius = '6px';
+arrow.style.cursor = 'pointer';
+
+arrow.style.fontSize = '24px';
+
+arrow.style.color = '#6b7280';
+
+arrow.style.fontSize = '12px';
+arrow.style.cursor = 'pointer';
+
+// ✅ 點箭頭才觸發
+
+arrow.onclick = (e)=>{
+  e.stopPropagation();
+
+  // ✅ 已存在就關閉
+  let oldMenu = document.getElementById('filterMenu');
+  if(oldMenu){
+    oldMenu.remove();
+    return;
+  }
+
+  // ✅ 建資料
+  let values = [...new Set(
+    db.map(p => p.info?.['requester'] || '-')
+  )];
+
+  let menu = createFilterMenu(
+    values,
+    filters.requester,
+    (val)=>{
+      filters.requester = val;
+      render();
+renderWeekly();
+renderGlobal();  
+    }
+  );
+
+  // ✅ 設 ID
+  menu.id = 'filterMenu';
+
+  document.body.appendChild(menu);
+
+let rect = arrow.getBoundingClientRect();
+
+menu.style.left = (rect.left + window.scrollX) + 'px';
+menu.style.top = (rect.bottom + window.scrollY + 4) + 'px';
+
+};
+
+h2.append(label, arrow);
+
+
+let h3 = document.createElement('div');
+h3.style.display = 'flex';
+h3.style.alignItems = 'center';
+h3.style.gap = '4px';
+
+// ✅ 文字
+let blLabel = document.createElement('span');
+blLabel.textContent = 'BL';
+
+// ✅ ▼箭頭
+let blArrow = document.createElement('span');
+blArrow.textContent = '▼';
+
+// ✅ ✅ 樣式（完全照 requester）
+blArrow.style.display = 'inline-flex';
+blArrow.style.alignItems = 'center';
+blArrow.style.justifyContent = 'center';
+blArrow.style.width = '26px';
+blArrow.style.height = '26px';
+blArrow.style.borderRadius = '6px';
+blArrow.style.cursor = 'pointer';
+blArrow.style.fontSize = '12px';
+blArrow.style.color = '#6b7280';
+
+// ✅ click（BL filter）
+blArrow.onclick = (e)=>{
+  e.stopPropagation();
+
+  let oldMenu = document.getElementById('filterMenu');
+  if(oldMenu){
+    oldMenu.remove();
+    return;
+  }
+
+  let values = [...new Set(
+    db.map(p => p.info?.['BL'] || '-')
+  )];
+
+  let menu = createFilterMenu(
+    values,
+    filters.bl,
+    (val)=>{
+      filters.bl = val;
+      render();
+renderWeekly();
+renderGlobal();
+    }
+  );
+
+  menu.id = 'filterMenu';
+
+  document.body.appendChild(menu);
+
+  let rect = blArrow.getBoundingClientRect();
+menu.style.left = (rect.left + window.scrollX) + 'px';
+menu.style.top = (rect.bottom + window.scrollY + 4) + 'px';
+};
+
+h3.append(blLabel, blArrow);
+
+
+let hPackage = document.createElement('div');
+hPackage.style.display = 'flex';
+hPackage.style.alignItems = 'center';
+hPackage.style.gap = '4px';
+
+let pkgLabel = document.createElement('span');
+pkgLabel.textContent = 'Package';
+
+let pkgArrow = document.createElement('span');
+pkgArrow.textContent = '▼';
+
+pkgArrow.style.display = 'inline-flex';
+pkgArrow.style.alignItems = 'center';
+pkgArrow.style.justifyContent = 'center';
+pkgArrow.style.width = '26px';
+pkgArrow.style.height = '26px';
+pkgArrow.style.borderRadius = '6px';
+pkgArrow.style.cursor = 'pointer';
+pkgArrow.style.fontSize = '12px';
+pkgArrow.style.color = '#6b7280';
+
+pkgArrow.onclick = (e)=>{
+  e.stopPropagation();
+
+  let oldMenu = document.getElementById('filterMenu');
+  if(oldMenu){
+    oldMenu.remove();
+    return;
+  }
+
+
+let values = [...new Set(
+  db.flatMap(p =>
+    (p.info?.['package type'] || '')
+      .split(',')
+      .map(s => s.trim())
+      .filter(s => s)
+  )
+)];
+
+
+  let menu = createFilterMenu(
+    values,
+    filters.packageType || [],
+    (val)=>{
+      filters.packageType = val;
+      render();
+renderWeekly();
+renderGlobal();
+    }
+  );
+
+  menu.id = 'filterMenu';
+
+  document.body.appendChild(menu);
+
+  let rect = pkgArrow.getBoundingClientRect();
+  menu.style.left = (rect.left + window.scrollX) + 'px';
+  menu.style.top = (rect.bottom + window.scrollY + 4) + 'px';
+};
+
+hPackage.append(pkgLabel, pkgArrow);
+
+let h4 = document.createElement('div');
+h4.style.display = 'flex';
+h4.style.alignItems = 'center';
+h4.style.gap = '4px';
+
+let typeLabel = document.createElement('span');
+typeLabel.textContent = 'Type Name';
+
+let typeArrow = document.createElement('span');
+typeArrow.textContent = '▼';
+
+typeArrow.style.display = 'inline-flex';
+typeArrow.style.alignItems = 'center';
+typeArrow.style.justifyContent = 'center';
+typeArrow.style.width = '26px';
+typeArrow.style.height = '26px';
+typeArrow.style.borderRadius = '6px';
+typeArrow.style.cursor = 'pointer';
+typeArrow.style.fontSize = '12px';
+typeArrow.style.color = '#6b7280';
+
+typeArrow.onclick = (e)=>{
+  e.stopPropagation();
+
+  let oldMenu = document.getElementById('filterMenu');
+  if(oldMenu){
+    oldMenu.remove();
+    return;
+  }
+
+let values = [...new Set(
+  db.flatMap(p => splitTypeNames(p.info?.['type name']))
+)];
+
+  let menu = createFilterMenu(
+    values,
+    filters.type,
+    (val)=>{
+      filters.type = val;
+      render();
+renderWeekly();
+renderGlobal();
+    }
+  );
+
+  menu.id = 'filterMenu';
+
+  document.body.appendChild(menu);
+
+  let rect = typeArrow.getBoundingClientRect();
+menu.style.left = (rect.left + window.scrollX) + 'px';
+menu.style.top = (rect.bottom + window.scrollY + 4) + 'px';
+};
+
+h4.append(typeLabel, typeArrow);
+
+
+
+let h5 = document.createElement('div');
+h5.style.display = 'flex';
+h5.style.alignItems = 'center';
+h5.style.gap = '4px';
+
+let stLabel = document.createElement('span');
+stLabel.textContent = 'Status';
+
+let stArrow = document.createElement('span');
+stArrow.textContent = '▼';
+
+stArrow.style.display = 'inline-flex';
+stArrow.style.alignItems = 'center';
+stArrow.style.justifyContent = 'center';
+stArrow.style.width = '26px';
+stArrow.style.height = '26px';
+stArrow.style.borderRadius = '6px';
+stArrow.style.cursor = 'pointer';
+stArrow.style.fontSize = '12px';
+stArrow.style.color = '#6b7280';
+
+// ✅ click（Status filter）
+stArrow.onclick = (e)=>{
+  e.stopPropagation();
+
+  let oldMenu = document.getElementById('filterMenu');
+  if(oldMenu){
+    oldMenu.remove();
+    return;
+  }
+
+  let values = ['todo','doing','done']; // ✅ status固定
+
+  let menu = createFilterMenu(
+    values,
+    filters.status,
+    (val)=>{
+      filters.status = val;
+      render();
+renderWeekly();
+renderGlobal();
+    }
+  );
+
+  menu.id = 'filterMenu';
+
+  document.body.appendChild(menu);
+
+  let rect = stArrow.getBoundingClientRect();
+
+menu.style.left = (rect.left + window.scrollX) + 'px';
+menu.style.top = (rect.bottom + window.scrollY + 4) + 'px';
+
+};
+
+h5.append(stLabel, stArrow);
+
+
+
+let h6 = document.createElement('div');
+
+// ✅ ✅ 新增按鈕容器（放紅框）
+let h7 = document.createElement('div');
+h7.style.display = 'flex';
+h7.style.alignItems = 'center';
+h7.style.justifyContent = 'flex-end';
+
+// ✅ ✅ 建立按鈕
+let toggleBtn = document.createElement('button');
+
+// ✅ UI（跟 Add 按鈕一致）
+toggleBtn.className = 'btn-add';
+
+// ✅ ✅ 文字切換
+toggleBtn.textContent = (kanbanMode === 'active') ? 'history' : 'active';
+
+// ✅ ✅ click 行為
+
+toggleBtn.onclick = (e)=>{
+  e.stopPropagation();
+
+  let board = document.querySelector('.board');
+
+  // ✅ fade out（直接改 style）
+  board.style.transition = 'opacity 0.2s ease';
+  board.style.opacity = '0';
+
+  setTimeout(()=>{
+
+    // ✅ 切模式
+    kanbanMode = (kanbanMode === 'active') ? 'history' : 'active';
+
+    render();
+
+    let newBoard = document.querySelector('.board');
+
+    // ✅ 先設透明
+    newBoard.style.opacity = '0';
+    newBoard.style.transition = 'opacity 0.2s ease';
+
+    // ✅ 強制 repaint
+    newBoard.offsetHeight;
+
+    // ✅ 再 fade-in
+    newBoard.style.opacity = '1';
+
+  },200);
+};
+
+// ✅ 放進 h7
+h7.appendChild(toggleBtn);
+
+let hRQS = document.createElement('div');
+hRQS.textContent = 'RQS';
+
+let hQuartz = document.createElement('div');
+hQuartz.textContent = 'Quartz';
+
+// ✅ 組起來
+header.append(
+    hRQS,
+    hQuartz,
+    h1,
+    h2,
+    h3,
+    hPackage,
+    h4,
+    h5,
+    h6,
+    h7
+);
+
+board.appendChild(header);
+
+let list = document.createElement('div');
+list.style.display = 'flex';
+list.style.flexDirection = 'column';
+list.style.gap = '6px';
+
+board.appendChild(list);
+
+db.forEach((p,i)=>{
+
+  if(kanbanMode === 'active' && p.status === 'done') return;
+  if(kanbanMode === 'history' && p.status !== 'done') return;
+
+let requester = p.info?.['requester'] || '-';
+let bl = p.info?.['BL'] || '-';
+let typeName = p.info?.['type name'] || '-';
+let packageType = p.info?.['package type'] || '-';
+let rqs = getSystemValue(p, 'RQS system') || '-';
+let quartz = getSystemValue(p, 'Quartz') || '-';
+
+  if(filters.project?.length && !filters.project.includes(p.name)) return;
+  if(filters.requester.length && !filters.requester.includes(requester)) return;
+  if(filters.bl.length && !filters.bl.includes(bl)) return;
+  
+if(filters.packageType?.length){
+
+  let pkgList = (packageType || '')
+    .split(',')
+    .map(s => s.trim())
+    .filter(s => s);
+
+  if(!pkgList.some(p => filters.packageType.includes(p))){
+    return;
+  }
+}
+
+  let typeList = splitTypeNames(typeName);
+  if(filters.type.length && !typeList.some(t => filters.type.includes(t))) return;
+  if(filters.status.length && !filters.status.includes(p.status)) return;
+
+  let cardColor = getBLColor(bl);
+
+  let c=document.createElement('div');
+
+// ✅ 讓這一列可以拖
+c.draggable = true;
+
+// ✅ 記住拖的是哪個
+c.ondragstart = () => {
+  dragIndex = i;
+  c.style.opacity = '0.4';
+};
+
+// ✅ 拖完恢復
+c.ondragend = () => {
+  c.style.opacity = '1';
+  c.style.background = 'transparent';
+  dragIndex = null;
+};
+
+// ✅ 允許被放
+c.ondragover = (e) => {
+  e.preventDefault();
+  c.style.background = '#eef5f2';
+};
+
+// ✅ 離開時取消高亮
+c.ondragleave = () => {
+  c.style.background = 'transparent';
+};
+
+// ✅ 放下時改順序
+c.ondrop = () => {
+
+  if(dragIndex === null || dragIndex === i) return;
+
+  let dragged = db[dragIndex];
+
+  db.splice(dragIndex, 1);
+  db.splice(i, 0, dragged);
+
+  dragIndex = null;
+
+  save();
+  render();
+  renderWeekly(); 
+};
+
+c.onclick = () => openP(i);
+c.style.borderLeft = `10px solid ${cardColor}`;
+c.style.paddingLeft = '12px';
+
+c.style.transition = 'all 0.15s ease';
+c.style.borderRadius = '8px';
+
+c.onmouseover = () => {
+  c.style.background = '#eef5f2';
+};
+
+c.onmouseout = () => {
+  c.style.background = 'transparent';
+};
+
+c.style.display = 'grid';
+c.style.gridTemplateColumns = COLS;
+c.style.alignItems = 'center';
+c.style.justifyItems = 'stretch';
+c.style.fontSize = '15px';
+c.style.lineHeight = '1.2';
+c.style.minWidth = '0';
+c.style.padding = '6px 12px';
+c.style.background = 'transparent';     // ✅ 拿掉白底
+c.style.borderRadius = '0';              // ✅ 拿掉圓角
+c.style.boxShadow = 'none';              // ✅ 拿掉陰影
+c.style.borderBottom = '1px solid #eee'; // ✅ 改用分隔線
+
+if(p.status === 'done'){
+  c.style.background = '#f3f4f6';
+  c.style.color = '#9ca3af';
+}
+// ✅ RQS
+let colRQS = document.createElement('div');
+colRQS.textContent = rqs;
+
+// ✅ Quartz
+let colQuartz = document.createElement('div');
+
+(quartz || '-')
+.split(',')
+.forEach(q => {
+    let line = document.createElement('div');
+    line.textContent = q.trim();
+    colQuartz.appendChild(line);
+});
+
+// ✅ Project
+let col1 = document.createElement('div');
+
+col1.textContent = p.name;
+col1.title = p.name;
+
+col1.style.minWidth = '0';
+col1.style.width = '100%';
+
+col1.style.fontWeight = '600';
+col1.style.whiteSpace = 'nowrap';
+col1.style.overflow = 'hidden';
+col1.style.textOverflow = 'ellipsis';
+
+// ✅ requester
+let col2 = document.createElement('div');
+col2.textContent = requester;
+
+col2.style.minWidth = '0';
+col2.style.whiteSpace = 'nowrap';
+col2.style.overflow = 'hidden';
+col2.style.textOverflow = 'ellipsis';
+
+col2.title = requester;
+
+// ✅ BL
+let col3 = document.createElement('div');
+col3.textContent = bl;
+
+let colPackage = document.createElement('div');
+
+let pkgList = (packageType || '')
+  .split(',')
+  .map(s => s.trim())
+  .filter(s => s);
+
+if(pkgList.length === 0){
+  colPackage.textContent = '-';
+}else{
+pkgList.forEach(p => {
+  let line = document.createElement('div');
+  line.textContent = p;
+  colPackage.appendChild(line);
+});
+}
+// ✅ type name
+
+let col4 = document.createElement('div');
+col4.style.minWidth = '0';
+col4.style.overflow = 'hidden';
+typeList.forEach(t => {
+  let line = document.createElement('div');
+  line.textContent = t;
+  col4.appendChild(line);
+});
+
+// ✅ 清空
+col4.innerHTML = '';
+
+typeList.forEach(t => {
+  let line = document.createElement('div');
+  line.textContent = t;
+  col4.appendChild(line);
+});
+
+// ✅ status dropdown
+let col5 = document.createElement('select');
+col5.className = 'status-select';
+col5.onclick = (e) => e.stopPropagation();
+['todo','doing','done'].forEach(s=>{
+  let opt = document.createElement('option');
+  opt.value = s;
+  opt.textContent = s;
+  col5.appendChild(opt);
+});
+
+col5.value = p.status;
+col5.style.marginRight = '10px';
+
+if(p.status === 'doing'){
+  col5.style.backgroundColor = '#FFF4B3';   // ✅ 鵝黃色
+} else if(p.status === 'done'){
+  col5.style.backgroundColor = '#e5e7eb';
+} else {
+  col5.style.backgroundColor = '#f3f4f6';   // 原灰色
+}
+
+// ✅ 改狀態
+col5.onchange = (e)=>{
+  p.status = e.target.value;
+
+  if(p.status === 'doing'){
+    col5.style.backgroundColor = '#FFF4B3';
+  } else if(p.status === 'done'){
+    col5.style.backgroundColor = '#e5e7eb';
+  } else {
+    col5.style.backgroundColor = '#f3f4f6';
+  }
+
+  save();
+  render();
+  renderGlobal();
+  renderWeekly();
+};
+
+ let edit=document.createElement('button');
+ edit.textContent='✏️';
+ edit.onclick=e=>{
+  e.stopPropagation();
+  let n=prompt('rename',p.name);
+  if(n){
+    p.name=n;
+    save();
+    render();
+    renderGlobal();
+  }
+ };
+
+let del=document.createElement('button');
+del.textContent='🗑';
+
+del.onclick = (e)=>{
+
+  e.stopPropagation();
+
+  if(!confirm(`Delete project "${p.name}" ?`)){
+    return;
+  }
+
+  lastDeletedProject = {
+    index: i,
+    data: JSON.parse(JSON.stringify(p))
+  };
+
+  db.splice(i,1);
+
+  save();
+  render();
+  renderGlobal();
+  renderWeekly();
+};
+
+[
+  colRQS,
+  colQuartz,
+  col1,
+  col2,
+  col3,
+  colPackage,
+  col4
+].forEach(col=>{
+  col.style.minWidth = '0';
+});
+
+c.append(
+    colRQS,
+    colQuartz,
+    col1,
+    col2,
+    col3,
+    colPackage,
+    col4,
+    col5,
+    edit,
+    del
+);
+ list.appendChild(c);
+});
+}
+
+function openP(i){cur=i;modal.style.display='flex';renderProject();}
+function removeNode(target, list){
+  let index = list.indexOf(target);
+
+  if(index !== -1){
+    list.splice(index, 1);
+    return true;
+  }
+
+  for(let item of list){
+    if(item.children && item.children.length){
+      let found = removeNode(target, item.children);
+      if(found) return true;
+    }
+  }
+
+  return false;
+}
+
+function createNewItem(){
+  return {
+    name:'item',
+    condition:'',
+    start:'',
+    end:'',
+    qlot:'',
+    ss:'',
+    g:'',
+    quartzId:'',
+    t0str:'',
+    t0bc:'',
+    note:'',
+    children:[]
+  };
+}
+
+function renderTree(it, container){
+let d = document.createElement('div');
+d.className = 'item';
+d.style.position = 'relative';
+
+let noteBtn = document.createElement('div');
+noteBtn.textContent = '💬';
+
+noteBtn.className = 'note-btn';
+
+noteBtn.style.position = 'absolute';
+noteBtn.style.top = '6px';
+noteBtn.style.right = '8px';
+noteBtn.style.fontSize = '14px';
+noteBtn.style.cursor = 'pointer';
+
+noteBtn.onclick = (e) => {
+
+  e.stopPropagation();
+
+if(!activeNoteItems.has(it)){
+  activeNoteItems.add(it);
+}
+
+activeNoteElement = null;
+activePopup = null;          // ✅ reset
+
+let popup = document.createElement('div');
+popup.className = 'note-popup';
+
+  // ✅ Header
+  let header = document.createElement('div');
+  header.className = 'note-popup-header';
+
+  let title = document.createElement('span');
+  title.textContent = 'NOTE';
+
+let close = document.createElement('span');
+close.textContent = '✕';
+close.className = 'note-popup-close';
+
+close.onclick = () => {
+  popup.remove();
+  activePopup = null;
+  activeNoteElement = null;
+activeNoteItems.delete(it);
+  if(it.note && it.note.trim() !== ''){
+    noteBtn.style.opacity = '1';
+  }else{
+    noteBtn.style.opacity = '0';   // ✅ ✅ 這行一定要加
+  }
+};
+
+  header.append(title, close);
+
+  // ✅ textarea
+  let textarea = document.createElement('textarea');
+  textarea.value = it.note || '';
+
+  textarea.oninput = () => {
+    it.note = textarea.value;
+    save();
+  };
+
+  // ✅ append
+  popup.append(header, textarea);
+
+document.body.appendChild(popup);
+
+// ✅ 每個 popup 自己追蹤位置（獨立運作）
+
+function updateThisPopup(){
+
+  let rect = d.getBoundingClientRect();
+  let modalRect = document.querySelector('.box').getBoundingClientRect();
+
+if(
+  rect.top < modalRect.top ||           // 上超出
+  rect.bottom > modalRect.bottom ||     // 下超出
+  rect.left < modalRect.left ||         // 左超出
+  rect.right > modalRect.right          // 右超出
+){
+  popup.style.display = 'none';
+}else{
+  popup.style.display = 'block';
+}
+
+  let left = rect.right + 8;
+  let top  = rect.top - 10;
+
+  // ✅ 右邊界限制
+  if(left + popup.offsetWidth > modalRect.right){
+    left = modalRect.right - popup.offsetWidth - 10;
+  }
+
+  // ✅ 左邊界限制
+  if(left < modalRect.left){
+    left = modalRect.left + 10;
+  }
+
+  // ✅ 上邊界
+  if(top < modalRect.top){
+    top = modalRect.top + 10;
+  }
+
+  // ✅ 下邊界
+  if(top + popup.offsetHeight > modalRect.bottom){
+    top = modalRect.bottom - popup.offsetHeight - 10;
+  }
+
+  popup.style.left = left + 'px';
+  popup.style.top  = top + 'px';
+
+  requestAnimationFrame(updateThisPopup);
+}
+
+updateThisPopup();
+
+};
+
+// ✅ 預設（如果有 note 就顯示）
+noteBtn.style.opacity = (it.note && it.note.trim() !== '') ? '1' : '0';
+
+// ✅ 加到 item
+d.appendChild(noteBtn);
+
+
+// ✅ 多筆 reopen
+if(activeNoteItems.has(it)){
+  setTimeout(() => {
+    noteBtn.click();
+  }, 150);
+}
+
+
+let currentWeek = getCurrentWeekNumber();
+
+if(!it.year){
+  it.year = new Date().getFullYear();
+}
+
+let autoStatus = 'todo';
+
+if(it.startWeek && it.endWeek){
+
+  if(it.year < ganttYear){
+    autoStatus = 'done';
+
+  }else if(it.year > ganttYear){
+    autoStatus = 'todo';
+
+  }else{
+
+    if(it.endWeek < currentWeek){
+      autoStatus = 'done';
+
+    }else if(it.startWeek > currentWeek){
+      autoStatus = 'todo';
+
+    }else{
+      autoStatus = 'doing';
+    }
+  }
+}
+
+let finalStatus = it.statusOverride || autoStatus;
+it._status = finalStatus;
+
+// ✅ 灰色 check（hover用）
+let manualCheck = document.createElement('div');
+manualCheck.textContent = '✔';
+
+manualCheck.style.position = 'absolute';
+manualCheck.style.top = '4px';
+manualCheck.style.left = '6px';
+
+manualCheck.style.fontSize = '18px';
+manualCheck.style.fontWeight = 'bold';
+
+manualCheck.style.color = '#9ca3af'; // ✅ 灰色
+manualCheck.style.opacity = (it._status === 'done') ? '1' : '0';
+manualCheck.style.cursor = 'pointer';
+
+manualCheck.style.pointerEvents = 'auto';
+
+// ✅ ✅ ✅ 新增【核心 click】
+manualCheck.onclick = (e) => {
+
+  e.stopPropagation(); // ✅ ✅ 最關鍵（防止點兩次BUG）
+
+  // ✅ toggle DONE
+  if(it.statusOverride === 'done'){
+    delete it.statusOverride;
+  }else{
+    it.statusOverride = 'done';
+  }
+
+  save();
+
+  renderProject();
+
+};
+
+d.appendChild(manualCheck);
+
+// ✅ DONE（已完成）
+if(it._status === 'done'){
+
+  d.style.background = '#e5e7eb';   // 灰底
+  d.style.opacity = '0.7';
+manualCheck.style.opacity = '1';
+manualCheck.style.color = 'red';
+
+}
+
+// ✅ DOING（進行中）
+if(it._status === 'doing'){
+  d.style.boxShadow = '0 0 6px rgba(245, 158, 11, 0.6)';
+  d.style.border = '3px solid #f59e0b';   // 橘色框
+
+}
+
+d.onmouseenter = () => {
+  bottomRow.style.opacity = '1';
+
+  // ✅ 顯示灰色✔（只有不是 done 才顯示）
+  if(it._status !== 'done'){
+    manualCheck.style.opacity = '1';
+    manualCheck.style.color = '#9ca3af'; 
+  }
+noteBtn.style.opacity = '1';
+};
+
+d.onmouseleave = () => {
+  bottomRow.style.opacity = '0';
+
+  if(it._status !== 'done'){
+    manualCheck.style.opacity = '0';
+  }
+
+if(!it.note || it.note.trim() === ''){
+  noteBtn.style.opacity = '0';
+}
+
+};
+
+// ✅ name
+let nm = document.createElement('input');
+nm.value = it.name;
+
+nm.ondblclick = () => {
+
+  let old = document.getElementById('flowScrollContainer');
+  if(old){
+    flowScrollMemory = old.scrollLeft;
+  }
+
+  openItemEditor(it);
+};
+;
+nm.onchange = e=>{
+  it.name = e.target.value;
+  save();
+};
+
+// ✅ condition
+let conditionWrap = document.createElement('div');
+conditionWrap.style.display = 'flex';
+conditionWrap.style.alignItems = 'center';
+conditionWrap.style.fontSize = '12px';
+conditionWrap.style.gap = '4px';
+conditionWrap.style.alignSelf = 'flex-start';
+
+// label
+let label = document.createElement('span');
+label.textContent = 'condition:';
+
+// ✅ 偽裝文字的 input
+let input = document.createElement('input');
+input.value = it.condition || '';
+input.placeholder = '-';
+
+// ✅ 關鍵樣式
+input.style.border = 'none';
+input.style.outline = 'none';
+input.style.background = 'transparent';
+input.style.padding = '0';
+input.style.margin = '0';
+
+// ✅ 看起來像文字
+input.style.fontSize = '12px';
+input.style.fontFamily = 'inherit';
+input.style.color = it.condition ? '#000' : '#999';
+
+input.style.width = '75px';
+input.style.minWidth = '75px';
+input.style.maxWidth = '75px';
+input.style.whiteSpace = 'nowrap';
+input.style.overflow = 'hidden';
+input.style.textOverflow = 'ellipsis';
+input.title = input.value;
+input.oninput = () => {
+input.style.color = input.value ? '#000' : '#999';
+input.title = input.value;
+};
+
+// ✅ 存資料
+input.onchange = (e) => {
+  it.condition = e.target.value.trim();
+  save();
+};
+
+conditionWrap.append(label, input);
+
+// ✅ 🗑
+let del = document.createElement('button');
+del.textContent = '🗑';
+del.className = 'del-btn';
+
+del.onclick = ()=>{
+
+  let targetInfo = null;
+
+  db[cur].layers.forEach(layer => {
+
+    // ✅ 找 root
+    if(layer.includes(it)){
+      let index = layer.indexOf(it);
+
+      targetInfo = {
+        list: layer,
+        index: index,
+        item: it
+      };
+
+      // ✅ ✅ ✅ 關鍵：把 children 插入原位置
+      if(it.children && it.children.length){
+        layer.splice(index, 1, ...it.children);
+      }else{
+        layer.splice(index, 1);
+      }
+    }
+
+    // ✅ 找 parent
+    let result = findParentWithList(it, layer);
+
+    if(result){
+      let list = result.list;
+      let index = list.indexOf(it);
+
+      targetInfo = {
+        list: list,
+        index: index,
+        item: it
+      };
+
+      // ✅ ✅ ✅ 關鍵：children 往上提
+      if(it.children && it.children.length){
+        list.splice(index, 1, ...it.children);
+      }else{
+        list.splice(index, 1);
+      }
+    }
+
+  });
+
+  // ✅ undo（仍然存原本 node）
+  
+undoStack.push({
+  list: targetInfo.list,
+  index: targetInfo.index,
+  item: it
+});
+
+  save();
+  renderProject();
+};
+
+// ✅ ↓
+let addChild = document.createElement('button');
+addChild.innerHTML = '↓';
+addChild.style.background = '#8faea0';
+
+addChild.onclick = ()=>{
+
+  if(!it.children) it.children = [];
+
+  // ✅ 先建立 newItem（唯一一個）
+  let newItem = {
+    name:'item',
+    condition:'',
+    start:'',
+    end:'',
+    qlot:'',
+    ss:'',
+    g:'',
+    quartzId:'',
+    t0str:'',
+    t0bc:'',
+    note:'',
+    children:[]
+  };
+
+  // ✅ 找目前所在的 Flow（layer）
+  let currentLayer = null;
+
+  db[cur].layers.forEach(layer => {
+    let all = getAllItems(layer);
+    if(all.includes(it)){
+      currentLayer = layer;
+    }
+  });
+
+  // ✅ 找 template（第一個有填資料的 item）
+  let template = null;
+
+  if(currentLayer){
+    let all = getAllItems(currentLayer);
+
+    template = all.find(x =>
+      x.qlot || x.ss || x.g || x.quartzId || x.t0str || x.t0bc
+    );
+  }
+
+  // ✅ 判斷 template 是否存在
+  let hasTemplate = template &&
+    (template.qlot || template.ss || template.g ||
+     template.quartzId || template.t0str || template.t0bc);
+
+  // ✅ 跳視窗
+  if(hasTemplate){
+
+    let useDefault = confirm(
+      "Apply default values to this new item?\n\n(Values will be copied from first item)"
+    );
+
+    // ✅ YES → copy
+    if(useDefault){
+
+      newItem.qlot = template.qlot || '';
+      newItem.ss = template.ss || '';
+      newItem.g = template.g || '';
+      newItem.quartzId = template.quartzId || '';
+      newItem.t0str = template.t0str || '';
+      newItem.t0bc = template.t0bc || '';
+
+    }
+  }
+
+  // ✅ ✅ ✅ 唯一 push（超重要）
+  it.children.push(newItem);
+
+  save();
+  renderProject();
+};
+
+  let insertUp = document.createElement('button');
+  insertUp.innerHTML = '↑';
+  insertUp.style.background = '#8faea0';
+
+
+insertUp.onclick = () => {
+
+  db[cur].layers.forEach(layer => {
+
+    let result = findParentWithList(it, layer);
+
+    if(result){
+
+      let list = result.list; // ✅ parent.children
+      let idx = list.indexOf(it);
+
+      if(idx !== -1){
+
+        // ✅ 建新 node（關鍵！）
+        let newNode = createNewItem();
+
+        // ✅ 把 item3 放進 newNode.children
+        newNode.children = [it];
+
+        // ✅ 用 newNode 取代原本 item3
+        list.splice(idx, 1, newNode);
+      }
+
+    }else{
+      // ✅ root 情況
+
+      let idx = layer.indexOf(it);
+
+      if(idx !== -1){
+
+        let newNode = createNewItem();
+        newNode.children = [it];
+
+        layer.splice(idx, 1, newNode);
+      }
+    }
+
+  });
+
+  save();
+  renderProject();
+};
+
+let bottomRow = document.createElement('div');
+
+bottomRow.style.display = 'flex';
+bottomRow.style.justifyContent = 'flex-end';
+bottomRow.style.gap = '2px';
+bottomRow.style.marginTop = '8px';
+
+// ✅ Hover 控制
+bottomRow.style.opacity = '0';
+bottomRow.style.transition = 'opacity 0.2s';
+
+// ✅ 放按鈕
+bottomRow.append(insertUp, addChild, del);
+d.append(nm, conditionWrap, bottomRow);
+container.appendChild(d);
+
+if(it.children && it.children.length){
+
+  // ✅ 子節點容器
+  let childWrap = document.createElement('div');
+  childWrap.style.display = 'flex';
+  childWrap.style.justifyContent = 'flex-start';
+  childWrap.style.alignItems = 'flex-start';
+  childWrap.style.position = 'relative';
+  childWrap.style.marginTop = '0px';
+  childWrap.style.gap = '20px';
+
+  // ✅ 橫線（直接撐滿）
+  if(it.children.length > 1){
+    let hLine = document.createElement('div');
+    hLine.style.position = 'absolute';
+    hLine.style.top = '0';
+    hLine.style.left = '10%';
+    hLine.style.right = '10%';
+    hLine.style.height = '2px';
+    hLine.style.background = '#999';
+    childWrap.appendChild(hLine);
+  }
+
+  it.children.forEach(child=>{
+
+    let col = document.createElement('div');
+    col.style.display = 'flex';
+    col.style.flexDirection = 'column';
+    col.style.alignItems = 'center';
+    col.style.position = 'relative';
+    col.style.margin = '0';
+
+    // ✅ 從橫線往下的直線
+    let vTop = document.createElement('div');
+    vTop.style.width = '2px';
+    vTop.style.height = '10px';
+    vTop.style.background = '#999';
+    vTop.style.marginTop = '0px';
+
+    col.appendChild(vTop);
+
+    // ✅ render children item
+    renderTree(child, col);
+
+    childWrap.appendChild(col);
+  });
+
+  // ✅ 從 parent 往下
+  let parentLine = document.createElement('div');
+  parentLine.style.width = '2px';
+  parentLine.style.height = it.children.length > 1 ? '10px' : '10px';
+  parentLine.style.background = '#999';
+  parentLine.style.marginTop = '0px';
+
+  container.appendChild(parentLine);
+  container.appendChild(childWrap);
+}
+}
+
+function updateNotePosition(){
+
+  if(!activeNoteElement || !activePopup) return;
+
+  let rect = activeNoteElement.getBoundingClientRect();
+
+  activePopup.style.left = (rect.right + 8) + 'px';
+  activePopup.style.top  = (rect.top - 10) + 'px';
+
+  requestAnimationFrame(updateNotePosition);
+}
+
+function renderProject(){
+
+if(mode !== 'plan'){
+  let old = document.querySelector('.note-popup');
+  if(old) old.remove();
+
+  activePopup = null;
+  activeNoteElement = null;
+}
+if(mode === 'plan'){
+  let old = document.getElementById('flowScrollContainer');
+
+  if(old){
+    flowScrollMemory = old.scrollLeft;
+  }
+}
+
+let area=document.getElementById('content');area.innerHTML='';let p=db[cur];
+
+if(!p) return;
+
+if(!p.noteData){
+
+  p.noteData = {
+    note: "",
+
+    system: [
+      { text: "RQS system:", done: false },
+      { text: "Risk assessment:", done: false },
+      { text: "Quartz:", done: false },
+      { text: "FT time booking:", done: false },
+      { text: "ESD request system:", done: false }
+    ],
+
+    action: [],
+    trial: []
+  };
+
+  save();
+}
+
+document.getElementById('weekly').innerHTML = '';
+document.getElementById('btnNote').classList.toggle('active', mode === 'note');
+document.getElementById('btnBg').classList.toggle('active', mode === 'bg');
+document.getElementById('btnInfo').classList.toggle('active', mode === 'info');
+document.getElementById('btnPlan').classList.toggle('active', mode === 'plan');
+document.getElementById('btnFT')?.classList.toggle('active', mode === 'ft');
+if(mode==='info'){
+  const DEFAULT_INFO = {
+    'requester':'',
+    'PE / TE / LTE owner':'',
+    'type name':'',
+    'nick name':'',
+    'package type':'',
+    'MAG':'',
+    'PL':'',
+    'BL':'',
+    'IO account':'',
+    'Tester / Handler':'',
+    'SOT':''
+  };
+
+  for(let key in DEFAULT_INFO){
+    if(!(key in p.info)){
+      p.info[key] = '';
+    }
+  }
+save();
+for(let k in p.info){let label=document.createElement('div');label.textContent=k;label.style.color = '#7a9e8e';let inp=document.createElement('input');inp.value=p.info[k];inp.style.width = '500px';inp.style.fontSize = '14px';inp.style.padding = '6px';inp.onchange=e=>{p.info[k]=e.target.value;save();render();};area.appendChild(label);area.appendChild(inp);}}
+if(mode==='plan'){
+  let addLayer = document.createElement('button');
+  addLayer.textContent='➕Flow';
+
+  addLayer.onclick=()=>{
+    p.layers.push([
+      {
+        name:'item',
+        condition:'',
+        start:'',
+        end:'',
+        qlot:'',
+        ss:'',
+        g:'',
+        quartzId:'',
+        t0str:'',
+        t0bc:'',
+        note:'',
+        children:[]
+      }
+    ]);
+
+    if(!p.layerNames) p.layerNames = [];
+    p.layerNames.push('Flow');
+
+    save();
+    renderProject();
+  };
+
+  let topBar = document.createElement('div');
+  topBar.style.display = 'flex';
+  topBar.style.justifyContent = 'flex-start';
+  topBar.style.gap = '10px';
+  topBar.style.alignItems = 'center';
+  topBar.style.marginBottom = '10px';
+
+  // ✅ 左邊：+Flow
+  topBar.appendChild(addLayer);
+
+  // ✅ 右邊：export
+  let exportBtn = document.createElement('button');
+  exportBtn.textContent = 'export excel';
+
+  
+exportBtn.onclick = () => {
+
+  let p = db[cur];  
+  let colorMap = {};
+  let colorPalette = ['blue', 'green', 'orange', 'purple', 'red', 'teal'];
+  let colorIndex = 0;
+  let allRows = []; 
+  let rowIndex = 7;
+  let ws = XLSX.utils.aoa_to_sheet([]);
+  ws['!merges'] = [];
+  ws['A1'] = { v: 'Latest Update' };
+  let today = new Date().toISOString().split('T')[0];
+  ws['B1'] = { v: today };
+ 
+ // ✅ Project Name
+  ws['A2'] = { v: p.name.toUpperCase() };
+
+// ✅ Week Header（第5列）
+for(let w = 1; w <= 52; w++){
+
+  let colIndex = 8 + (w - 1);   // I欄開始
+  let colLetter = XLSX.utils.encode_col(colIndex);
+  let yearShort = String(new Date().getFullYear()).slice(2);
+  let weekStr = String(w).padStart(2, '0');
+  ws[colLetter + '5'] = {
+  v: yearShort + weekStr,
+  s: { alignment: { horizontal: "center" } }
+};
+
+}
+
+ws['A6'] = { v: 'Product Type' };
+ws['B6'] = { v: 'Test item' };
+ws['C6'] = { v: 'Qual. Lot' };
+ws['D6'] = { v: 'Sample Sizes' };
+ws['E6'] = { v: 'T0 reference sample' };
+ws['F6'] = { v: 'QUARTZ ID' };
+ws['G6'] = { v: 'T0 STR' };
+ws['H6'] = { v: 'T0 B/C' };
+
+// ✅ 月份 header（第4列）
+let monthMap = {}; 
+
+let currentYear = new Date().getFullYear();
+let yearStart = new Date(currentYear, 0, 1);
+
+// helper：找某週的「星期一」
+function getMondayOfWeek(week){
+  let d = new Date(yearStart);
+
+  // 找到第一個星期一
+  let firstDay = d.getDay();
+  let diff = (firstDay === 0 ? -6 : 1) - firstDay;
+  d.setDate(d.getDate() + diff);
+
+  // 加週數
+  d.setDate(d.getDate() + (week - 1) * 7);
+
+  return d;
+}
+
+for(let w = 1; w <= 52; w++){
+
+  let date = getMondayOfWeek(w);
+  if(date.getFullYear() !== currentYear) continue;
+  let monthIndex = date.getMonth();
+  let monthName = date.toLocaleString('en-US', { month: 'long' });
+
+  let colIndex = 8 + (w - 1);
+
+if(!monthMap[monthIndex]){
+  monthMap[monthIndex] = {
+    name: monthName,
+    start: colIndex,
+    end: colIndex
+  };
+}else{
+  monthMap[monthIndex].end = colIndex;
+}
+
+}
+
+// ✅ 寫入月份 + merge
+
+let sortedMonths = Object.keys(monthMap)
+  .map(Number)
+  .sort((a, b) => a - b);
+
+for(let m of sortedMonths){
+
+  let data = monthMap[m];
+
+  let start = data.start;
+  let end = data.end;
+  let name = data.name;
+
+  let startCol = XLSX.utils.encode_col(start);
+
+  ws[startCol + '4'] = { v: name };
+  if(
+  typeof start === 'number' &&
+  typeof end === 'number' &&
+  end > start &&
+  (end - start) < 60
+){
+  ws['!merges'].push({
+    s: { r: 3, c: start },
+    e: { r: 3, c: end }
+  });
+}
+
+}
+
+ // ✅ Flow loop
+  p.layers.forEach((layer, li) => {
+    let flowName = p.layerNames?.[li] || 'Flow';
+    let flowStartRow = rowIndex; // ✅ Flow起點
+
+    let items = getAllItems(layer);
+
+    items.forEach(it => {
+
+    let itemStartRow = rowIndex; // ✅ item起點
+
+  // ✅ 顏色 mapping
+  if(!colorMap[it.name]){
+    colorMap[it.name] = colorPalette[colorIndex % colorPalette.length];
+    colorIndex++;
+  }
+  let qlotArr = (it.qlot || '').split(',');
+  let ssArr = (it.ss || '').split(',');
+  let gArr = (it.g || '').split(',');
+  let quartzArr = (it.quartzId || '').split(',');
+  let t0strArr = (it.t0str || '').split(',');
+  let t0bcArr = (it.t0bc || '').split(',');
+
+  let maxLen = Math.max(qlotArr.length, ssArr.length, gArr.length,quartzArr.length,t0strArr.length,t0bcArr.length
+);
+
+  for(let i = 0; i < maxLen; i++){
+
+let row = {
+  projectName: p.name,
+  flowName: flowName,
+  itemName: it.name,
+  condition: it.condition || '',
+
+  qlot: qlotArr[i] || '',
+  ss: ssArr[i] || '',
+  g: gArr[i] || '',
+  quartzId: quartzArr[i] || '',
+  t0str: t0strArr[i] || '',
+  t0bc: t0bcArr[i] || ''
+};
+
+// ✅ ===== 加甘特圖欄位（52週）=====
+for(let w = 1; w <= 52; w++){
+
+  if(it.startWeek && it.endWeek &&
+     w >= it.startWeek && w <= it.endWeek){
+
+    row['W' + w] = {
+    text: it.name,
+    color: colorMap[it.name]
+  };
+  }else{
+    row['W' + w] = '';
+  }
+
+}
+
+allRows.push(row); 
+
+// ✅ ✅ ✅ 寫入 Excel 左半部
+
+ws['A' + rowIndex] = { v: flowName };
+
+ws['B' + rowIndex] = {
+  v: it.condition
+    ? `${it.name} — ${it.condition}`
+    : it.name
+};
+
+ws['C' + rowIndex] = { v: row.qlot };
+ws['D' + rowIndex] = { v: row.ss };
+ws['E' + rowIndex] = { v: row.g };
+ws['F' + rowIndex] = { v: row.quartzId };
+ws['G' + rowIndex] = { v: row.t0str };
+ws['H' + rowIndex] = { v: row.t0bc };
+
+// ✅ ✅ ✅ 甘特圖（W1~W52 → I欄開始）
+for(let w = 1; w <= 52; w++){
+
+  let colIndex = 8 + (w - 1);   // ✅ I欄 = 8
+  let colLetter = XLSX.utils.encode_col(colIndex);
+
+  let cellValue = row['W' + w];
+
+  if(cellValue){
+    ws[colLetter + rowIndex] = { v: cellValue.text }; 
+  }else{
+    ws[colLetter + rowIndex] = { v: '' };
+  }
+
+}
+
+// ✅ 下一列
+rowIndex++;
+  }
+
+      if(rowIndex - itemStartRow > 1){
+        ws['!merges'].push({
+          s: { r: itemStartRow - 1, c: 1 },
+          e: { r: rowIndex - 2, c: 1 }
+        });
+      }
+
+    });
+
+    if(rowIndex - flowStartRow > 1){
+      ws['!merges'].push({
+        s: { r: flowStartRow - 1, c: 0 },
+        e: { r: rowIndex - 2, c: 0 }
+      });
+    }
+rowIndex++;
+
+  });
+  ws['!ref'] = 'A1:BF200';
+  let wb = XLSX.utils.book_new();
+  ws['!cols'] = [
+  { wch: 18 }, // A Flow
+  { wch: 20 }, // B item
+  { wch: 10 }, // C
+  { wch: 10 }, // D
+  { wch: 8  }, // E
+  { wch: 14 }, // F
+  { wch: 12 }, // G
+  { wch: 12 }, // H
+];
+
+// ✅ 甘特圖欄寬（W1~W52）
+for(let i = 0; i < 52; i++){
+  ws['!cols'].push({ wch: 4 });
+}
+
+  XLSX.utils.book_append_sheet(wb, ws, 'Schedule');
+  XLSX.writeFile(wb, `${p.name}_Schedule_${today}.xlsx`);
+
+};
+
+  topBar.appendChild(exportBtn);
+
+  // ✅ 把 topBar 加進畫面
+  area.appendChild(topBar);
+
+// ✅ 建立容器（先做）
+let flowContainer = document.createElement('div');
+flowContainer.id = 'flowScrollContainer';
+flowContainer.style.visibility = 'hidden';
+flowContainer.style.display = 'flex';
+flowContainer.style.gap = '40px';
+flowContainer.style.alignItems = 'flex-start';
+flowContainer.style.overflowX = 'auto';
+flowContainer.style.width = '100%';
+
+// ✅ 加到畫面
+area.appendChild(flowContainer);
+
+p.layers.forEach((layer,li)=>{let row=document.createElement('div');row.className='row';
+row.style.display = 'flex';
+row.style.flexDirection = 'row';
+row.style.alignItems = 'flex-start';
+row.style.flexWrap = 'nowrap';
+row.style.overflowX = 'auto';
+row.style.paddingBottom = '10px';
+row.style.justifyContent = 'center';
+row.style.gap = '20px';
+let delLayer = document.createElement('button');
+delLayer.textContent = '🗑';
+
+let copyLayer = document.createElement('button');
+copyLayer.textContent = '📄';
+copyLayer.title = 'copy flow';
+
+let header = document.createElement('div');
+header.style.display = 'flex';
+header.style.justifyContent = 'space-between';
+header.style.alignItems = 'center';
+header.style.width = '100%';
+
+let btnBox = document.createElement('div');
+btnBox.style.display = 'flex';
+btnBox.style.gap = '6px';
+
+copyLayer.onclick = () => {
+
+  // ✅ deep copy（重點）
+  
+let newLayer = JSON.parse(JSON.stringify(layer));
+
+newLayer.forEach(cleanFields);
+
+function cleanFields(it){
+  delete it.fields;
+  delete it.draft;
+
+  if(it.children){
+    it.children.forEach(cleanFields);
+  }
+}
+
+  // ✅ 加進 layers
+  p.layers.push(newLayer);
+
+  // ✅ flow 名稱一起 copy + 改名
+  if(!p.layerNames) p.layerNames = [];
+  let name = p.layerNames[li] || 'Flow';
+  p.layerNames.push(name + ' (copy)');
+
+  save();
+  renderProject();
+  renderGlobal();
+};
+
+delLayer.onclick = () => {
+  p.layers.splice(li, 1);
+
+  if(p.layerNames){
+    p.layerNames.splice(li, 1);
+  }
+
+  save();
+  renderProject();
+  renderGlobal();
+};
+
+layer.forEach(it => {
+
+  // ✅ 每個母 item一個「直向容器」
+  let col = document.createElement('div');
+  col.style.display = 'flex';
+  col.style.flexDirection = 'column';
+  col.style.alignItems = 'center';
+  col.style.minWidth = '80px';
+  col.style.flex = '0 0 auto';
+
+  // ✅ 把整棵 tree 畫進這個 column
+  renderTree(it, col);
+
+  // ✅ 再把 column 放進 row（row負責橫排）
+  row.appendChild(col);
+
+});
+
+let addRoot = document.createElement('button');
+addRoot.textContent = '+';
+addRoot.style.height = '28px';
+addRoot.style.minWidth = '28px';
+addRoot.style.marginTop = '45px';
+addRoot.style.fontSize = '12px';
+addRoot.style.background = '#8faea0';
+addRoot.style.borderRadius = '999px';
+addRoot.style.border = 'none';
+addRoot.style.cursor = 'pointer';
+addRoot.onclick = () => {
+  layer.push({
+    name:'item',
+    condition:'',
+    start:'',
+    end:'',
+    qlot:'',
+    ss:'',
+    g:'',
+    quartzId:'',
+    t0str:'',
+    t0bc:'',
+    note:'',
+    children:[]
+  });
+
+  save();
+  renderProject();
+};
+
+row.appendChild(addRoot);
+
+let layerBox = document.createElement('div');
+layerBox.style.background = `hsl(${li * 60}, 70%, 90%)`;
+layerBox.style.borderRadius = '16px';
+layerBox.style.padding = '20px 6px';
+layerBox.style.marginBottom = '20px';
+layerBox.style.position = 'relative';
+layerBox.style.display = 'inline-flex';
+layerBox.style.flexDirection = 'column';
+layerBox.style.alignItems = 'center';
+layerBox.style.gap = '15px';
+layerBox.style.minWidth = 'fit-content';
+layerBox.style.boxShadow = '0 4px 10px rgba(0,0,0,0.08)';
+delLayer.style.marginRight = '10px';
+if(!p.layerNames) p.layerNames = [];
+if(!p.layerNames[li]){
+  p.layerNames[li] = 'Flow';
+}
+let title = document.createElement('input');
+title.value = p.layerNames[li];
+title.style.fontWeight = '600';
+title.style.marginBottom = '10px';
+title.style.textAlign = 'center';
+title.style.border = 'none';
+title.style.background = 'transparent';
+title.style.outline = 'none';
+title.style.fontSize = '16px';
+title.style.width = '80%';
+title.style.boxSizing = 'border-box';
+title.onchange = (e)=>{
+  p.layerNames[li] = e.target.value;
+  save();
+};
+
+let shiftLayer = document.createElement('button');
+shiftLayer.textContent = '⇆';
+shiftLayer.title = 'shift weeks';
+
+// ✅ 核心功能
+shiftLayer.onclick = () => {
+  let val = prompt('Shift weeks (ex: +1, -2)', '1');
+  if(!val) return;
+
+  let shift = Number(val);
+  if(isNaN(shift)) {
+    alert('請輸入數字');
+    return;
+  }
+
+  shiftFlow(layer, shift);
+
+  save();
+  renderProject();
+  renderWeekly();
+  renderGlobal();
+};
+
+btnBox.append(copyLayer, delLayer, shiftLayer);
+
+header.append(title, btnBox);
+layerBox.append(header, row);
+flowContainer.appendChild(layerBox);
+});
+
+requestAnimationFrame(() => {
+  requestAnimationFrame(() => {
+    flowContainer.scrollLeft = flowScrollMemory || 0;
+   flowContainer.style.visibility = 'visible';
+  });
+});
+
+}
+
+
+if(mode==='note'){
+
+  if(!p.note) p.note = '';
+
+  // ✅ ===== 卡片（外框）=====
+  let noteCard = document.createElement('div');
+
+  noteCard.style.background = '#f3f7f5';   // ✅ 跟 SYSTEM 一樣
+  noteCard.style.borderRadius = '10px';
+  noteCard.style.marginTop = '20px';
+  noteCard.style.marginLeft = '20px';
+  noteCard.style.marginRight = '20px';
+  noteCard.style.padding = '12px';
+
+// ✅ ===== headerRow=====
+let headerRow = document.createElement('div');
+
+headerRow.style.display = 'flex';
+headerRow.style.alignItems = 'center';
+headerRow.style.justifyContent = 'space-between';
+headerRow.style.marginBottom = '1px';
+
+  // ✅ ===== Title =====
+  let title = document.createElement('div');
+  title.textContent = 'NOTE';
+  title.style.fontWeight = '600';
+  title.style.marginBottom = '10px';
+
+  // ✅ ===== toolbar（也包進卡片）=====
+  let toolbar = document.createElement('div');
+  toolbar.style.display = 'flex';
+  toolbar.style.gap = '6px';
+  toolbar.style.marginBottom = '8px';
+
+  function createBtn(text, action){
+    let btn = document.createElement('button');
+    btn.textContent = text;
+    btn.style.cursor = 'pointer';
+    btn.onclick = action;
+    return btn;
+  }
+
+  toolbar.appendChild(createBtn('B', () => {
+    document.execCommand('bold');
+  }));
+
+  toolbar.appendChild(createBtn('red', () => {
+    let sel = window.getSelection();
+    if(!sel.rangeCount) return;
+
+    let node = sel.anchorNode.parentNode;
+    let color = getComputedStyle(node).color;
+
+    if(color === 'rgb(255, 0, 0)'){
+      document.execCommand('foreColor', false, 'black');
+    }else{
+      document.execCommand('foreColor', false, 'red');
+    }
+  }));
+
+  toolbar.appendChild(createBtn('highlight', () => {
+    let sel = window.getSelection();
+    if(!sel.rangeCount) return;
+
+    let node = sel.anchorNode.parentNode;
+    let bg = getComputedStyle(node).backgroundColor;
+
+    if(bg === 'rgb(255, 255, 0)'){
+      document.execCommand('hiliteColor', false, 'transparent');
+    }else{
+      document.execCommand('hiliteColor', false, 'yellow');
+    }
+  }));
+
+  // ✅ ===== editor=====
+  let editor = document.createElement('div');
+
+  editor.contentEditable = true;
+  editor.innerHTML = p.note || '';
+
+editor.style.minHeight = '60px';
+editor.style.maxHeight = '120px';
+editor.style.overflowY = 'auto';
+
+  editor.style.padding = '0px 4px';
+  editor.style.outline = 'none';
+
+  editor.style.background = 'transparent'; 
+  editor.style.border = 'none';
+
+  editor.style.fontFamily = '"Segoe UI","Microsoft JhengHei",sans-serif';
+  editor.style.fontSize = '15px';
+  editor.style.lineHeight = '1.6';
+
+  editor.oninput = () => {
+    p.note = editor.innerHTML;
+    save();
+  };
+
+  // ✅ ===== 組合 =====
+headerRow.append(title, toolbar);
+noteCard.append(headerRow, editor);
+  area.appendChild(noteCard);
+
+// ✅ ===== SYSTEM 區（先顯示） =====
+let systemBox = document.createElement('div');
+systemBox.style.background = '#f3f7f5'; 
+systemBox.style.padding = '2px 12px';      // ✅ 內距
+systemBox.style.borderRadius = '10px';      // ✅ 圓角
+systemBox.style.marginTop = '20px';
+systemBox.style.marginLeft = '20px';
+systemBox.style.marginRight = '20px';
+
+let systemTitle = document.createElement('div');
+systemTitle.textContent = 'SYSTEM';
+systemTitle.style.marginTop = '20px';
+systemTitle.style.fontWeight = '600';
+systemBox.appendChild(systemTitle);
+
+p.noteData.system.forEach(item => {
+
+  let row = document.createElement('div');
+  row.style.display = 'flex';
+  row.style.alignItems = 'center';
+  row.style.gap = '8px';
+  row.style.padding = '4px 0';
+  row.style.marginLeft = '10px';
+
+  // ✅ checkbox
+  let checkbox = document.createElement('input');
+  checkbox.type = 'checkbox';
+  checkbox.checked = item.done;
+
+// ✅ title
+let title = document.createElement('span');
+title.contentEditable = true;
+title.textContent = item.text;
+
+title.style.padding = '2px 6px';
+title.style.minWidth = '120px';
+title.style.display = 'inline-block';
+
+
+// ✅ 下方（Status | Note）
+let meta = document.createElement('div');
+
+meta.style.display = 'flex';
+meta.style.alignItems = 'center';
+meta.style.gap = '8px';
+meta.style.fontSize = '12px';
+meta.style.color = '#6b7280';
+meta.style.marginLeft = '24px';
+meta.style.width = '100%';
+
+// ✅ Status label
+let statusLabel = document.createElement('span');
+statusLabel.textContent = 'Status:';
+
+// ✅ Status input
+let statusInput = document.createElement('input');
+statusInput.value = item.status || '';
+
+statusInput.style.border = 'none';
+statusInput.style.outline = 'none';
+statusInput.style.background = 'transparent';
+statusInput.style.fontSize = '12px';
+statusInput.style.width = '120px';
+
+// ✅ 存
+statusInput.oninput = () => {
+  item.status = statusInput.value;
+  save();
+};
+
+// ✅ 分隔
+let sep = document.createElement('span');
+sep.textContent = ' | ';
+
+// ✅ Note label
+let noteLabel = document.createElement('span');
+noteLabel.textContent = 'Note:';
+
+let noteInput = document.createElement('input');
+
+noteInput.value = item.note || '';
+
+// ✅ UI
+noteInput.style.border = 'none';
+noteInput.style.outline = 'none';
+noteInput.style.background = 'transparent';
+noteInput.style.fontSize = '12px';
+noteInput.style.flex = '1';
+noteInput.style.marginRight = '20px';
+
+// ✅ 存資料
+noteInput.oninput = () => {
+  item.note = noteInput.value;
+  save();
+};
+
+
+// ✅ 組合
+meta.append(statusLabel, statusInput, sep, noteLabel, noteInput);
+meta.style.fontSize = '12px';
+meta.style.color = '#6b7280';
+meta.style.marginLeft = '24px';
+meta.style.marginTop = '-8px'; 
+
+// ✅ 編輯 title
+title.oninput = () => {
+  item.text = title.textContent;
+  save();
+};
+
+  // ✅ 勾選行為
+checkbox.onchange = () => {
+  item.done = checkbox.checked;
+  save();
+};
+
+  // ✅ 文字編輯
+title.oninput = () => {
+  item.text = title.textContent;
+  save();
+};
+
+  // ✅ ✖ 刪除按鈕
+  let del = document.createElement('span');
+  del.textContent = '✖';
+
+  del.style.fontSize = '10px';
+  del.style.cursor = 'pointer';
+  del.style.color = '#999';
+  del.style.marginLeft = '6px';
+  del.style.opacity = '0';        // ✅ 預設隱藏
+  del.style.transition = '0.2s';
+
+  // ✅ hover 顯示
+  row.onmouseenter = () => {
+    del.style.opacity = '1';
+  };
+
+  row.onmouseleave = () => {
+    del.style.opacity = '0';
+  };
+
+  // ✅ 刪除邏輯
+  del.onclick = () => {
+
+    let index = p.noteData.system.indexOf(item);
+
+    if(index !== -1){
+      p.noteData.system.splice(index, 1);
+    }
+
+    save();
+    renderProject();   // ✅ 重新畫面
+  };
+
+  row.append(checkbox, title, del);
+  systemBox.appendChild(row);
+ systemBox.appendChild(meta);
+
+});
+
+let addRow = document.createElement('div');
+
+addRow.style.display = 'flex';
+addRow.style.alignItems = 'center';
+addRow.style.gap = '8px';
+addRow.style.padding = '4px 0';
+addRow.style.marginLeft = '10px';
+
+addRow.style.cursor = 'pointer';
+addRow.style.color = '#9ca3af';   // ✅ 淡灰
+
+// ✅ 對齊 checkbox
+let fakeBox = document.createElement('div');
+fakeBox.style.width = '16px';
+
+// ✅ 文字
+let label = document.createElement('span');
+label.textContent = '＋ Add item';
+
+// ✅ hover 效果
+addRow.onmouseenter = () => {
+  addRow.style.color = '#374151';
+  addRow.style.background = '#f3f4f6';
+};
+
+addRow.onmouseleave = () => {
+  addRow.style.color = '#9ca3af';
+  addRow.style.background = 'transparent';
+};
+
+// ✅ 點擊新增
+addRow.onclick = () => {
+
+p.noteData.system.push({
+  text: 'new item',
+  done: false,
+  status: '',
+  note: ''
+});
+
+  save();
+  renderProject();
+};
+
+// ✅ 組起來
+addRow.append(fakeBox, label);
+systemBox.appendChild(addRow);
+area.appendChild(systemBox);
+
+// ✅ ===== ACTION 區 =====
+let actionBox = document.createElement('div');
+
+actionBox.style.background = '#f3f7f5'; 
+actionBox.style.padding = '2px 12px';
+actionBox.style.borderRadius = '10px';
+actionBox.style.marginTop = '20px';
+actionBox.style.marginLeft = '20px';
+actionBox.style.marginRight = '20px';
+
+// ✅ title
+let actionTitle = document.createElement('div');
+actionTitle.textContent = 'ACTION';
+actionTitle.style.marginTop = '20px';
+actionTitle.style.fontWeight = '600';
+
+actionBox.appendChild(actionTitle);
+
+
+// ✅ list
+p.noteData.action.forEach(item => {
+
+  let row = document.createElement('div');
+  row.style.display = 'flex';
+  row.style.alignItems = 'center';
+  row.style.gap = '8px';
+  row.style.padding = '4px 0';
+  row.style.marginLeft = '10px';
+
+
+// ✅ checkbox
+let checkbox = document.createElement('input');
+checkbox.type = 'checkbox';
+checkbox.checked = item.done;
+
+// ✅ 文字
+let text = document.createElement('span');
+text.contentEditable = true;
+text.textContent = item.text;
+
+// ✅ UI
+text.style.padding = '2px 6px';
+text.style.minWidth = '120px';
+text.style.display = 'inline-block';
+
+// ✅ 淡掉 + 動畫
+text.style.transition = '0.2s';
+text.style.opacity = item.done ? '0.5' : '1';
+
+// ✅ 勾選行為
+checkbox.onchange = () => {
+  item.done = checkbox.checked;
+
+  text.style.opacity = item.done ? '0.5' : '1';
+
+  save();
+};
+
+// ✅ 文字編輯
+text.oninput = () => {
+  item.text = text.textContent;
+  save();
+};
+
+  // ✅ 刪除
+  let del = document.createElement('span');
+  del.textContent = '✖';
+
+  del.style.fontSize = '10px';
+  del.style.cursor = 'pointer';
+  del.style.color = '#999';
+  del.style.marginLeft = '6px';
+  del.style.opacity = '0';
+  del.style.transition = '0.2s';
+
+  row.onmouseenter = () => del.style.opacity = '1';
+  row.onmouseleave = () => del.style.opacity = '0';
+
+  del.onclick = () => {
+    let index = p.noteData.action.indexOf(item);
+    if(index !== -1) p.noteData.action.splice(index, 1);
+
+    save();
+    renderProject();
+  };
+
+  row.append(checkbox, text, del);
+  actionBox.appendChild(row);
+});
+
+// ✅ Add row
+let addRowA = document.createElement('div');
+
+addRowA.style.display = 'flex';
+addRowA.style.alignItems = 'center';
+addRowA.style.gap = '8px';
+addRowA.style.padding = '4px 0';
+addRowA.style.marginLeft = '10px';
+addRowA.style.cursor = 'pointer';
+addRowA.style.color = '#9ca3af';
+
+let fakeBoxA = document.createElement('div');
+fakeBoxA.style.width = '16px';
+
+let labelA = document.createElement('span');
+labelA.textContent = '＋ Add item';
+
+addRowA.onmouseenter = () => {
+  addRowA.style.color = '#374151';
+  addRowA.style.background = '#f3f4f6';
+};
+
+addRowA.onmouseleave = () => {
+  addRowA.style.color = '#9ca3af';
+  addRowA.style.background = 'transparent';
+};
+
+addRowA.onclick = () => {
+  p.noteData.action.push({
+    text: '',
+    done: false
+  });
+
+  save();
+  renderProject();
+};
+
+addRowA.append(fakeBoxA, labelA);
+actionBox.appendChild(addRowA);
+
+area.appendChild(actionBox);
+
+// ✅ ===== TRIAL RUN ACTION 區 =====
+let trialBox = document.createElement('div');
+
+trialBox.style.background = '#f3f7f5'; 
+trialBox.style.padding = '2px 12px';
+trialBox.style.borderRadius = '10px';
+trialBox.style.marginTop = '20px';
+trialBox.style.marginLeft = '20px';
+trialBox.style.marginRight = '20px';
+
+// ✅ title
+let trialTitle = document.createElement('div');
+trialTitle.textContent = 'TRIAL RUN ACTION';
+trialTitle.style.marginTop = '20px';
+trialTitle.style.fontWeight = '600';
+
+trialBox.appendChild(trialTitle);
+
+
+// ✅ list
+p.noteData.trial.forEach(item => {
+
+  let row = document.createElement('div');
+  row.style.display = 'flex';
+  row.style.alignItems = 'center';
+  row.style.gap = '8px';
+  row.style.padding = '4px 0';
+  row.style.marginLeft = '10px';
+
+  // ✅ checkbox
+  let checkbox = document.createElement('input');
+  checkbox.type = 'checkbox';
+  checkbox.checked = item.done;
+
+  // ✅ text
+  let text = document.createElement('span');
+  text.contentEditable = true;
+  text.textContent = item.text;
+
+  text.style.padding = '2px 6px';
+  text.style.minWidth = '120px';
+  text.style.display = 'inline-block';
+  text.style.transition = '0.2s';
+  text.style.opacity = item.done ? '0.5' : '1';
+
+  // ✅ checkbox 行為
+  checkbox.onchange = () => {
+    item.done = checkbox.checked;
+    text.style.opacity = item.done ? '0.5' : '1';
+    save();
+  };
+
+  // ✅ 編輯
+  text.oninput = () => {
+    item.text = text.textContent;
+    save();
+  };
+
+  // ✅ 刪除
+  let del = document.createElement('span');
+  del.textContent = '✖';
+
+  del.style.fontSize = '10px';
+  del.style.cursor = 'pointer';
+  del.style.color = '#999';
+  del.style.marginLeft = '6px';
+  del.style.opacity = '0';
+  del.style.transition = '0.2s';
+
+  row.onmouseenter = () => del.style.opacity = '1';
+  row.onmouseleave = () => del.style.opacity = '0';
+
+  del.onclick = () => {
+    let index = p.noteData.trial.indexOf(item);
+    if(index !== -1) p.noteData.trial.splice(index, 1);
+
+    save();
+    renderProject();
+  };
+
+  row.append(checkbox, text, del);
+  trialBox.appendChild(row);
+});
+
+
+// ✅ Add row
+let addRowT = document.createElement('div');
+
+addRowT.style.display = 'flex';
+addRowT.style.alignItems = 'center';
+addRowT.style.gap = '8px';
+addRowT.style.padding = '4px 0';
+addRowT.style.marginLeft = '10px';
+addRowT.style.cursor = 'pointer';
+addRowT.style.color = '#9ca3af';
+
+let fakeBoxT = document.createElement('div');
+fakeBoxT.style.width = '16px';
+
+let labelT = document.createElement('span');
+labelT.textContent = '＋ Add item';
+
+addRowT.onmouseenter = () => {
+  addRowT.style.color = '#374151';
+  addRowT.style.background = '#f3f4f6';
+};
+
+addRowT.onmouseleave = () => {
+  addRowT.style.color = '#9ca3af';
+  addRowT.style.background = 'transparent';
+};
+
+addRowT.onclick = () => {
+  p.noteData.trial.push({
+    text: ' ',
+    done: false
+  });
+
+  save();
+  renderProject();
+};
+
+addRowT.append(fakeBoxT, labelT);
+trialBox.appendChild(addRowT);
+
+
+// ✅ 加到畫面
+area.appendChild(trialBox);
+
+}
+
+if(mode==='bg'){
+  if(!p.background) p.background = '';
+
+  let textarea = document.createElement('textarea');
+
+  textarea.value = p.background;
+  textarea.placeholder = 'background info...';
+
+  textarea.style.width = '90%';
+  textarea.style.height = '300px';
+  textarea.style.padding = '10px';
+  textarea.style.fontSize = '15px';
+  textarea.style.borderRadius = '8px';
+  textarea.style.marginTop = '20px';
+
+  textarea.oninput = e => {
+    p.background = e.target.value;
+    save();
+  };
+
+  area.appendChild(textarea);
+}
+
+if(mode === 'ft'){
+
+  if(!p.ft) p.ft = [];
+
+  let wrap = document.createElement('div');
+
+  // ========= input =========
+  let thRaw = p.info?.['Tester / Handler'] || '';
+  let [defaultTester, defaultHandler] = thRaw.split('/').map(x => x?.trim() || '');
+
+  let inputBox = document.createElement('div');
+  inputBox.style.display = 'flex';
+  inputBox.style.flexDirection = 'column';
+  inputBox.style.gap = '6px';
+  inputBox.style.marginBottom = '50px';
+
+  let r1 = document.createElement('div');
+  r1.style.display = 'flex';
+  r1.style.gap = '8px';
+
+  let r2 = document.createElement('div');
+  r2.style.display = 'flex';
+  r2.style.gap = '8px';
+
+  let typeInput = document.createElement('input');
+  typeInput.placeholder = 'type name';
+
+  let testerInput = document.createElement('input');
+  testerInput.value = defaultTester;
+
+  let handlerInput = document.createElement('input');
+  handlerInput.value = defaultHandler;
+  handlerInput.placeholder = 'handler';
+
+  let yearInput = document.createElement('input');
+  yearInput.type = 'number';
+  yearInput.value = currentYear;
+  yearInput.style.width = '80px';
+
+  let startW = document.createElement('input');
+  startW.placeholder = 'start W';
+  startW.type = 'number';
+  startW.style.width = '80px';
+
+  let endW = document.createElement('input');
+  endW.placeholder = 'end W';
+  endW.type = 'number';
+ endW.style.width = '80px';
+
+  let hours = document.createElement('input');
+  hours.placeholder = 'hours';
+  hours.type = 'number';
+  hours.style.width = '80px';
+
+  let addBtn = document.createElement('button');
+  addBtn.textContent = '+ Add';
+  addBtn.style.background = '#7a9e8e';
+  addBtn.style.color = '#fff';
+
+  r1.append(typeInput, testerInput, handlerInput);
+  r2.append(yearInput, startW, endW, hours, addBtn);
+
+  inputBox.append(r1, r2);
+  wrap.appendChild(inputBox);
+
+  // ========= add =========
+  addBtn.onclick = () => {
+
+    let y = Number(yearInput.value);
+    let s = Number(startW.value);
+    let e = Number(endW.value);
+    let h = Number(hours.value);
+
+    if(!typeInput.value) return alert('type?');
+
+    for(let w=s; w<=e; w++){
+      let ex = p.ft.find(x=>x.type===typeInput.value&&x.week===w&&x.year===y);
+
+      if(ex){
+        ex.hours = h;
+      }else{
+        p.ft.push({
+          type:typeInput.value,
+          tester:testerInput.value,
+          handler:handlerInput.value,
+          year:y,
+          week:w,
+          hours:h
+        });
+      }
+    }
+
+    save();
+    renderProject();
+  };
+
+  // ========= weeks =========
+  let weekSet = new Set();
+p.ft.forEach(r=>{
+
+  if(
+    r.year === currentYear &&
+    Number(r.hours) > 0
+  ){
+    weekSet.add(r.week);
+  }
+
+});
+
+  let activeWeeks = [...weekSet].sort((a,b)=>a-b);
+  if(activeWeeks.length===0){
+    area.appendChild(wrap);
+    return;
+  }
+
+  // ========= group =========
+  let group = {};
+
+  p.ft.forEach(r=>{
+    if(r.year!==currentYear) return;
+
+    if(!group[r.type]){
+      group[r.type] = {
+        tester:r.tester,
+        handler:r.handler,
+        weeks:{}
+      };
+    }
+
+    if(!group[r.type].weeks[r.week]){
+      group[r.type].weeks[r.week] = 0;
+    }
+
+    group[r.type].weeks[r.week] += Number(r.hours);
+  });
+
+  // ========= header =========
+  let header = document.createElement('div');
+  header.style.display = 'grid';
+  header.style.gridTemplateColumns = `200px repeat(${activeWeeks.length}, 60px) 40px`;
+  header.style.marginBottom = '6px';
+
+  header.appendChild(document.createElement('div'));
+
+activeWeeks.forEach(w=>{
+  let c = document.createElement('div');
+  c.textContent = 'W'+w;
+
+  c.style.fontSize = '10px';
+  c.style.color = '#666';
+  c.style.textAlign = 'center';
+
+  header.appendChild(c);
+});
+
+// ✅ + 欄位的表頭
+header.appendChild(
+  document.createElement('div')
+);
+
+  wrap.appendChild(header);
+
+  // ========= row =========
+
+Object.entries(group).forEach(([type,data])=>{
+
+    let row = document.createElement('div');
+
+    row.style.display = 'grid';
+    row.style.gridTemplateColumns =
+      `200px repeat(${activeWeeks.length}, 60px) 40px`;
+
+    row.style.marginBottom = '6px';
+
+    let label = document.createElement('div');
+
+    let typeText = document.createElement('div');
+    typeText.textContent = type;
+    typeText.style.fontWeight = '600';
+
+    let subText = document.createElement('div');
+    subText.textContent =
+      `${data.tester} / ${data.handler}`;
+
+    subText.style.fontSize = '10px';
+    subText.style.color = '#666';
+
+    label.append(typeText, subText);
+
+    let labelWrap = document.createElement('div');
+    labelWrap.style.display = 'flex';
+    labelWrap.style.justifyContent = 'space-between';
+    labelWrap.style.alignItems = 'center';
+    labelWrap.style.paddingRight = '12px';
+
+    row.appendChild(labelWrap);
+
+    labelWrap.appendChild(label);
+
+    activeWeeks.forEach(w=>{
+
+      let cell = document.createElement('div');
+
+      cell.style.textAlign = 'center';
+      cell.style.display = 'flex';
+      cell.style.alignItems = 'center';
+      cell.style.justifyContent = 'center';
+
+      let val = data.weeks[w];
+
+      if(val){
+
+        cell.textContent = val;
+
+        cell.style.background = '#7a9e8e';
+        cell.style.color = '#fff';
+        cell.style.borderRadius = '6px';
+        cell.style.margin = '0 1px';
+      }
+
+      cell.ondblclick = ()=>{
+
+        let input = document.createElement('input');
+
+        input.type = 'number';
+        input.value = val || '';
+        input.style.width = '50px';
+
+        cell.innerHTML = '';
+        cell.appendChild(input);
+
+        input.focus();
+
+        function saveEdit(){
+
+          let newVal = Number(input.value);
+
+          let rows = p.ft.filter(x =>
+            x.type === type &&
+            x.week === w &&
+            x.year === currentYear
+          );
+
+         if(rows.length === 0){
+
+  if(newVal > 0){
+
+    p.ft.push({
+      type,
+      tester:data.tester,
+      handler:data.handler,
+      year:currentYear,
+      week:w,
+      hours:newVal
+    });
+
+  }
+
+}else{
+
+  if(newVal <= 0){
+
+    p.ft = p.ft.filter(x =>
+      !(
+        x.type === type &&
+        x.week === w &&
+        x.year === currentYear
+      )
+    );
+
+  }else{
+
+    rows.forEach(r=>{
+      r.hours = newVal;
+    });
+
+  }
+
+}
+
+          save();
+          renderProject();
+        }
+
+        input.onblur = saveEdit;
+
+        input.onkeydown = e=>{
+          if(e.key === 'Enter'){
+            saveEdit();
+          }
+        };
+      };
+
+      row.appendChild(cell);
+    });
+
+    // ✅ 新增紅色＋
+
+    let addWeekCell = document.createElement('div');
+
+    addWeekCell.textContent = '+';
+
+    addWeekCell.style.color = '#9CA3AF';
+    addWeekCell.style.fontSize = '28px';
+    addWeekCell.style.fontWeight = 'bold';
+    addWeekCell.style.cursor = 'pointer';
+    addWeekCell.style.textAlign = 'center';
+
+    addWeekCell.onclick = ()=>{
+
+      let weekList = Object.keys(data.weeks)
+        .map(Number)
+        .sort((a,b)=>a-b);
+
+      let nextWeek =
+        weekList.length
+        ? Math.max(...weekList) + 1
+        : 1;
+
+      if(nextWeek > 52){
+        return;
+      }
+
+      let newHour = prompt(
+        `Hours for W${nextWeek}`,
+        ''
+      );
+
+      if(newHour === null) return;
+
+      p.ft.push({
+        type:type,
+        tester:data.tester,
+        handler:data.handler,
+        year:currentYear,
+        week:nextWeek,
+        hours:Number(newHour) || 0
+      });
+
+      save();
+      renderProject();
+    };
+
+    row.appendChild(addWeekCell);
+
+    wrap.appendChild(row);
+});
+
+  area.appendChild(wrap);
+}
+
+renderGantt();
+
+}
+function getMonday(d){d=new Date(d);let day=d.getDay()||7;if(day!==1)d.setDate(d.getDate()-day+1);return d}
+function prevMonth(){
+  currentMonth.setMonth(currentMonth.getMonth() - 1);
+  renderGlobal();
+}
+
+function nextMonth(){
+  currentMonth.setMonth(currentMonth.getMonth() + 1);
+  renderGlobal();
+}
+
+function prevGanttYear(){
+  ganttYear--;
+  renderProject();
+}
+
+function nextGanttYear(){
+  ganttYear++;
+  renderProject();
+}
+
+function shiftFlow(layer, shift){
+
+  let all = getAllItems(layer);
+
+  all.forEach(it => {
+
+    // ✅ 只有 week mode 才處理
+    if(it.startWeek && it.endWeek){
+
+      it.startWeek += shift;
+      it.endWeek += shift;
+
+      // ✅ 防呆
+      if(it.startWeek < 1) it.startWeek = 1;
+      if(it.endWeek > 52) it.endWeek = 52;
+    }
+
+  });
+
+}
+
+function renderGantt(){
+let g=document.getElementById('gantt');
+
+g.style.overflowX = 'auto';
+g.style.whiteSpace = 'nowrap';
+
+g.innerHTML = `
+  <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:10px;">
+    <button onclick="prevGanttYear()">◀</button>
+    <div style="font-weight:600">${ganttYear}</div>
+    <button onclick="nextGanttYear()">▶</button>
+  </div>
+`;
+
+// ✅ 取得當週
+let currentWeek = getCurrentWeekNumber();
+
+// ✅ highlight 當週
+let highlightCol = document.createElement('div');
+
+let cellWidth = 40;  // ✅ 跟你 grid 一樣
+let left = (currentWeek - 1) * cellWidth;
+
+highlightCol.style.position = 'absolute';
+highlightCol.style.top = '40px';   // ✅ 略過 header（header高度約40px）
+highlightCol.style.left = left + 'px';
+highlightCol.style.width = cellWidth + 'px';
+highlightCol.style.height = '100%';
+
+highlightCol.style.background = '#FFF9DB'; // ✅ 淡黃色
+
+highlightCol.style.zIndex = '1';
+highlightCol.style.pointerEvents = 'none';
+
+// ✅ gantt container 必須有 relative
+g.style.position = 'relative';
+
+g.appendChild(highlightCol);
+
+  let p=db[cur]; 
+  if(!p) return;
+
+  let all = [];
+
+  p.layers.forEach(layer=>{
+    all = all.concat(getAllItems(layer));
+  });
+
+let weeks = Array.from({length: 52}, (_, i) => i + 1);
+let palette = [
+  '#D5A6A6',
+  '#BFD3BF',
+  '#B7C7E2',
+  '#D8C9A6',
+  '#D5B8AE',
+  '#B7D4CF',
+  '#E0E2A8',
+  '#CDB7C9'
+];
+let header = document.createElement('div');
+header.style.display = 'grid';
+header.style.gridTemplateColumns = 'repeat(52, 40px)';
+header.style.fontSize = '10px';
+header.style.position = 'relative';   // ✅ 新增
+header.style.zIndex = '2';   
+
+weeks.forEach(w => {
+  let h = document.createElement('div');
+  h.textContent = 'W' + w;
+  h.style.textAlign = 'center';
+  header.appendChild(h);
+});
+
+g.appendChild(header);
+
+let rows = {};
+
+  p.layers.forEach((layer, li) => {
+
+    let flowName = p.layerNames?.[li] || 'Flow';
+
+    let flat = getAllItems(layer);
+
+let items = [];
+
+flat.forEach(x => {
+  if(!x.startWeek || !x.endWeek) return;
+  if(!x.year) x.year = new Date().getFullYear();
+  // ✅ 同一年
+  if(x.startWeek <= x.endWeek){
+
+    if(x.year === ganttYear){
+      items.push({
+        ...x,
+        start: x.startWeek,
+        end: x.endWeek,
+        pcolor: palette[li % palette.length]
+      });
+    }
+
+  }else{
+
+    // ✅ 跨年（拆兩段）
+
+    // 今年尾巴
+    if(x.year === ganttYear){
+      items.push({
+        ...x,
+        start: x.startWeek,
+        end: 52,
+        pcolor: palette[li % palette.length]
+      });
+    }
+
+    // 下一年開頭
+    if(x.year + 1 === ganttYear){
+      items.push({
+        ...x,
+        start: 1,
+        end: x.endWeek,
+        pcolor: palette[li % palette.length]
+      });
+    }
+
+  }
+
+});
+
+    if(!items.length) return;
+
+    rows[flowName] = items.map(x => ({
+      ...x,
+      pcolor: palette[li % palette.length]
+    }));
+  });
+
+  Object.entries(rows).forEach(([flowName, items]) => {
+    drawWeekGantt(weeks, items, g, flowName);
+  });
+
+setTimeout(() => {
+
+  let container = document.getElementById('gantt');
+  if(!container) return;
+
+  let bars = container.querySelectorAll('div[style*="position: absolute"]');
+
+  if(!bars.length) return;
+
+  // ✅ 找最左邊的 bar（不是第一個）
+  let minLeft = Infinity;
+
+  bars.forEach(b => {
+    minLeft = Math.min(minLeft, b.offsetLeft);
+  });
+
+  container.scrollLeft = minLeft - 80;
+
+}, 50);
+
+}
+
+function drawWeekGantt(weeks, items, g, flowName){
+let container = document.createElement('div');
+  container.style.marginBottom = '12px';
+
+
+let headerRow = document.createElement('div');
+
+headerRow.style.display = 'flex';
+headerRow.style.alignItems = 'center';
+headerRow.style.justifyContent = 'space-between';
+headerRow.style.marginBottom = '6px';
+
+// ✅ 左側 NOTE
+let title = document.createElement('div');
+title.textContent = flowName;
+title.style.fontWeight = '600';
+
+// ✅ 右側 toolbar
+let toolbar = document.createElement('div');
+toolbar.style.display = 'flex';
+toolbar.style.gap = '6px';
+
+
+  container.appendChild(title);
+
+  // ✅ row container
+  let row = document.createElement('div');
+  row.style.position = 'relative';
+
+  let grid = document.createElement('div');
+  grid.style.display = 'grid';
+  grid.style.gridTemplateColumns = 'repeat(52, 40px)';
+  grid.style.height = (items.length * 20 + 10) + 'px';
+  grid.style.zIndex = '1';
+
+  // ✅ 底格
+  weeks.forEach(() => {
+    let c = document.createElement('div');
+    c.style.borderRight = '1px solid #eee';
+    grid.appendChild(c);
+  });
+
+  row.appendChild(grid);
+
+  // ✅ 畫 bar
+  items.forEach((it, idx) => {
+
+    let bar = document.createElement('div');
+
+    let cellWidth = 40;
+
+    let left = (it.start - 1) * cellWidth;
+    let width = (it.end - it.start + 1) * cellWidth;
+    let topOffset = 6 + idx * 20;
+    bar.style.position = 'absolute';
+    bar.style.zIndex = '2';
+    bar.style.left = left + 'px';
+    bar.style.width = width + 'px';
+    bar.style.top = topOffset + 'px';
+    bar.style.height = '18px';
+
+    bar.style.background = it.pcolor;
+    bar.style.borderRadius = '0px';
+
+    // ✅ 分隔線
+    bar.style.borderLeft = '2px solid #333';
+    bar.style.borderRight = '2px solid #333';
+
+    // ✅ 文字
+    let label = document.createElement('div');
+    label.textContent = it.name;
+    label.style.position = 'absolute';
+    label.style.left = (left + width/2) + 'px';
+    label.style.top = (topOffset + 3) + 'px';
+    label.style.transform = 'translateX(-50%)';
+    label.style.fontSize = '10px';
+    label.style.whiteSpace = 'nowrap';
+    label.style.pointerEvents = 'none';
+    label.style.zIndex = '3';
+
+    row.appendChild(bar);
+    row.appendChild(label);
+  });
+
+container.appendChild(row);
+g.appendChild(container);
+
+}
+
+function findParentWithList(target, list){
+  for(let item of list){
+
+    if(item.children && item.children.includes(target)){
+      return {
+        parent: item,
+        list: item.children
+      };
+    }
+
+    if(item.children){
+      let found = findParentWithList(target, item.children);
+      if(found) return found;
+    }
+  }
+
+  return null;
+}
+
+function renderGlobal(){
+  let area = document.getElementById('global');
+  let y = currentMonth.getFullYear();
+  let m = currentMonth.getMonth();
+ 
+area.innerHTML = `
+  <div style="display:flex; justify-content:center; align-items:center; gap:10px;">
+    <button onclick="prevMonth()">◀</button>
+    <h3 class="global-title">${y}/${m+1} - Daily Gantt</h3>
+    <button onclick="nextMonth()">▶</button>
+  </div>
+`;
+
+let weekHeader = document.createElement('div');
+weekHeader.className = 'grid';
+
+['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(d=>{
+  let cell = document.createElement('div');
+  cell.textContent = d;
+  cell.style.textAlign = 'center';
+  cell.style.fontSize = '12px';
+  cell.style.fontWeight = '600';
+  cell.style.padding = '4px 0';
+  weekHeader.appendChild(cell);
+});
+
+area.appendChild(weekHeader);
+
+  let items=[];
+  let counter = 0;
+ 
+db.forEach(p=>{
+  if(!passFilter(p)) return;
+  if(p.status==='done') return;
+  p.layers?.forEach((l, li)=>{
+
+    let flat = getAllItems(l);
+
+    flat.forEach(i=>{
+      if(i.start && i.end){
+        items.push({
+          ...i,
+          pname:p.name,
+          pcolor:p.color,
+          idx: counter++,
+          flowName: (p.layerNames && p.layerNames[li]) ? p.layerNames[li] : 'Flow'
+        });
+      }
+    });
+
+  });
+});
+
+  let first = new Date(y, m, 1);
+  let last = new Date(y, m + 1, 0);
+
+  let d = new Date(first);
+  let week=[];
+
+let firstDay = first.getDay(); // 0=Sun,1=Mon,...
+
+for(let i = 0; i < firstDay; i++){
+  week.push(null);
+}
+
+  while(d <= last){
+    week.push(new Date(d));
+
+    if(week.length === 7){
+      draw(week, items, area);
+      week=[];
+    }
+
+    d.setDate(d.getDate()+1);
+  }
+
+if(week.length > 0){
+
+  while(week.length < 7){
+    week.push(null);
+  }
+
+  draw(week, items, area);
+}
+
+}
+function draw(week,items,g){
+let row=document.createElement('div');
+let grid=document.createElement('div');
+grid.className='grid';
+const today = new Date();
+week.forEach(day=>{
+let c = document.createElement('div');
+c.className = 'cell';
+if(!day){
+grid.appendChild(c);
+return;
+}
+
+// ✅ Highlight 今天
+if(
+day.getFullYear() === today.getFullYear() &&
+day.getMonth() === today.getMonth() &&
+day.getDate() === today.getDate()
+){
+c.style.background = '#FFF9DB';
+}
+
+c.textContent=(day.getMonth()+1)+'/'+day.getDate();
+items.forEach(it=>{
+let show = false;
+
+if(it.start && it.end){
+
+  let s = parseLocalDate(it.start);
+  let e = parseLocalDate(it.end);
+
+  // ✅ 只顯示開始日與結束日
+  if(
+    day.toDateString() === s.toDateString() ||
+    day.toDateString() === e.toDateString()
+  ){
+    show = true;
+  }
+
+}
+
+if(show){
+let b=document.createElement('div');b.className='bar';
+
+if(it.pcolor){
+  b.style.background = it.pcolor;
+}else{
+  b.style.background = it.color;
+}
+
+b.textContent=(it.flowName||'')+' - '+ it.name;
+
+let duration = '';
+let dateRange = '';
+
+if(it.mode === 'date'){
+
+  let s = parseLocalDate(it.start);
+  let e = parseLocalDate(it.end);
+
+  duration =
+    Math.floor((e - s) / (1000 * 60 * 60 * 24)) + 1;
+
+  dateRange =
+    `${s.getMonth()+1}/${s.getDate()}~${e.getMonth()+1}/${e.getDate()}`;
+
+}
+else if(it.mode === 'week'){
+
+  duration = it.endWeek - it.startWeek + 1;
+
+}
+
+b.title =
+`${it.flowName || ''} - ${it.name}
+duration: ${duration} days
+date: ${dateRange}`;
+
+c.appendChild(b);}});
+grid.appendChild(c);});row.appendChild(grid);g.appendChild(row);} 
+
+render();
+renderGlobal();
+
+function openItemEditor(it, p){
+
+let old = document.querySelector('.note-popup');
+if(old) old.remove();
+
+activePopup = null;
+activeNoteElement = null;
+
+  const modal = document.getElementById('modal');
+  const content = document.getElementById('content');
+
+  mode = 'plan';
+
+  content.innerHTML = '';
+
+  let box = document.createElement('div');
+box.style.paddingTop = '20px';
+box.style.position = 'relative';
+box.style.display = 'flex';
+box.style.flexDirection = 'column';
+box.style.gap = '12px';
+
+let back = document.createElement('button');
+back.textContent = '← Back';
+back.style.position = 'absolute';
+back.style.top = '10px';
+back.style.right = '15px';
+back.style.zIndex = '10';
+
+back.onclick = () => {
+  renderProject(); 
+};
+
+  // 名稱
+let nameInput = document.createElement('input');
+let conditionInput = document.createElement('input');
+conditionInput.placeholder = 'condition';
+conditionInput.value = it.condition || '';
+
+conditionInput.onchange = e => {
+  it.condition = e.target.value;
+  save();
+};
+
+  nameInput.value = it.name;
+  nameInput.onchange = e => {
+    it.name = e.target.value;
+    save();
+  };
+
+if(!it.mode) it.mode = 'week';
+
+let modeBox = document.createElement('div');
+modeBox.style.display = 'flex';
+modeBox.style.gap = '10px';
+
+let dateBtn = document.createElement('button');
+dateBtn.textContent = 'Date';
+dateBtn.style.background = it.mode === 'date' ? '#7a9e8e' : '#e5e7eb';
+
+let weekBtn = document.createElement('button');
+weekBtn.textContent = 'Week';
+weekBtn.style.background = it.mode === 'week' ? '#7a9e8e' : '#e5e7eb';
+
+dateBtn.onclick = () => {
+  it.mode = 'date';
+  save();
+  openItemEditor(it);
+};
+
+weekBtn.onclick = () => {
+  it.mode = 'week';
+  save();
+  openItemEditor(it);
+};
+
+modeBox.append(dateBtn, weekBtn);
+
+// ✅ ===== date inputs =====
+let start = document.createElement('input');
+start.type = 'date';
+start.value = it.start || '';
+
+start.onchange = e => {
+  it.start = e.target.value;
+  end.min = it.start;
+  save();
+};
+
+let end = document.createElement('input');
+end.type = 'date';
+end.value = it.end || '';
+
+if(it.start){
+  end.min = it.start;
+}
+
+end.onchange = e => {
+  let val = e.target.value;
+
+  if(it.start && val < it.start){
+    alert('結束時間不能早於開始時間');
+    e.target.value = it.start;
+    it.end = it.start;
+  }else{
+    it.end = val;
+  }
+
+  save();
+};
+
+
+// ✅ ===== year input =====
+let yearInput = document.createElement('input');
+yearInput.type = 'number';
+yearInput.placeholder = 'year';
+yearInput.value = it.year || new Date().getFullYear();
+
+yearInput.onchange = e => {
+  it.year = Number(e.target.value);
+  save();
+};
+
+// ✅ ===== week inputs =====
+let startWeek = document.createElement('input');
+startWeek.type = 'number';
+startWeek.min = 1;
+startWeek.max = 52;
+startWeek.placeholder = 'start WW';
+startWeek.value = it.startWeek || '';
+
+startWeek.onchange = e => {
+  it.startWeek = Number(e.target.value);
+  save();
+};
+
+let endWeek = document.createElement('input');
+endWeek.type = 'number';
+endWeek.min = 1;
+endWeek.max = 52;
+endWeek.placeholder = 'end WW';
+endWeek.value = it.endWeek || '';
+
+endWeek.onchange = e => {
+  it.endWeek = Number(e.target.value);
+  save();
+};
+
+let row2 = document.createElement('div');
+row2.style.display = 'flex';
+row2.style.gap = '10px';
+
+if(it.mode === 'date'){
+  row2.append(start, end);
+}else{
+  row2.append(yearInput, startWeek, endWeek);
+}
+
+// ✅ 加 Apply 按鈕
+let applyBtn = document.createElement('button');
+applyBtn.textContent = 'Apply to all items';
+applyBtn.style.height = '28px';
+applyBtn.style.marginLeft = 'auto'; 
+applyBtn.style.marginRight = '20px';
+row2.appendChild(applyBtn);
+
+// ✅ 判斷是不是第一個 root item
+let isFirst = false;
+
+db[cur].layers.forEach(layer => {
+  if(layer[0] === it){
+    isFirst = true;
+  }
+});
+
+// ❌ 如果不是第一個 → 不顯示
+if(!isFirst){
+  applyBtn.style.display = 'none';
+}
+
+applyBtn.onclick = () => {
+
+let mode = prompt(
+  "Apply mode:\n\n1 = Fill empty only\n2 = Override ALL\n\n請輸入 1 或 2",
+  "1"
+);
+
+if(!mode) return;
+
+let isOverride = (mode === '2');
+
+  // ✅ 找 layer
+  let currentLayer = null;
+
+  db[cur].layers.forEach(layer => {
+    if(layer.includes(it)){
+      currentLayer = layer;
+    }
+  });
+
+  if(!currentLayer) return;
+
+  // ✅ 展開所有 item
+  let allItems = getAllItems(currentLayer);
+
+  // ✅ copy（只填空欄）
+let updateCount = 0; 
+allItems.forEach(target => {
+  let updated = false; // ✅ 每個 item 是否被改
+
+  if((!target.qlot && it.qlot) || isOverride){
+    target.qlot = it.qlot;
+    updated = true;
+  }
+
+  if((!target.ss && it.ss) || isOverride){
+    target.ss = it.ss;
+    updated = true;
+  }
+
+  if((!target.g && it.g) || isOverride){
+    target.g = it.g;
+    updated = true;
+  }
+
+  if((!target.quartzId && it.quartzId) || isOverride){
+    target.quartzId = it.quartzId;
+    updated = true;
+  }
+
+  if((!target.t0str && it.t0str) || isOverride){
+    target.t0str = it.t0str;
+    updated = true;
+  }
+
+  if((!target.t0bc && it.t0bc) || isOverride){
+    target.t0bc = it.t0bc;
+    updated = true;
+  }
+
+  if(updated){
+    updateCount++;  // ✅ 有發生更新才 +1
+  }
+
+});
+
+save();
+renderProject();
+
+// ✅ 顯示結果
+alert(updateCount + " items updated");
+
+};
+
+let ok = document.createElement('button');
+ok.textContent = '✔';
+ok.style.width = '20px';
+ok.style.height = '30px';
+ok.style.fontSize = '14px';
+ok.style.alignSelf = 'flex-start';
+
+ok.onclick = () => {
+
+  save();
+
+  openItemEditor(it, p); 
+};
+
+let row1 = document.createElement('div');
+row1.style.display = 'flex';
+row1.style.gap = '10px';
+row1.style.alignItems = 'center';
+
+row1.append(back, nameInput, conditionInput);
+
+// ✅ item note（編輯視窗用）
+if(!it.note) it.note = '';
+
+// ✅ ===== extra fields 區塊 =====
+let extraBox = document.createElement('div');
+extraBox.style.display = 'grid';
+extraBox.style.gridTemplateColumns = 'repeat(3, 1fr)';
+extraBox.style.gap = '8px';
+extraBox.style.marginTop = '10px';
+
+// helper function（建立一個欄位）
+function createField(labelText, key){
+  let wrap = document.createElement('div');
+
+  let label = document.createElement('div');
+  label.textContent = labelText;
+  label.style.fontSize = '12px';
+
+  let input = document.createElement('input');
+  input.value = it[key] || '';
+  input.style.border = '1px solid #ccc';
+  input.style.background = '#fff';
+  input.onchange = e => {
+    it[key] = e.target.value;
+    save();
+  };
+
+  wrap.append(label, input);
+  extraBox.appendChild(wrap);
+}
+
+// ✅ 六個欄位
+createField('Qlot', 'qlot');
+createField('S.S.', 'ss');
+createField('G', 'g');
+createField('QUARTZ ID', 'quartzId');
+createField('T0 STR', 't0str');
+createField('T0 B/C', 't0bc');
+
+let noteArea = document.createElement('textarea');
+
+noteArea.value = it.note;
+noteArea.placeholder = 'note...';
+
+noteArea.style.width = '90%';
+noteArea.style.height = '80px';
+noteArea.style.padding = '8px';
+noteArea.style.borderRadius = '8px';
+noteArea.style.fontSize = '13px';
+
+noteArea.oninput = e=>{
+  it.note = e.target.value;
+  save();
+};
+
+box.append(modeBox, row1, row2, extraBox, noteArea, ok);
+
+  content.appendChild(box);
+
+  // 打開 modal
+  modal.style.display = 'flex';
+}
+
+function undoLastItem(){
+
+  if(undoStack.length === 0) return;
+
+  let last = undoStack.pop();
+
+  let { list, index, item } = last;
+
+  // ✅ 放回原本位置
+if(item.children && item.children.length){
+  item.children.forEach(child => {
+    let idx = list.indexOf(child);
+    if(idx !== -1){
+      list.splice(idx, 1);
+    }
+  });
+}
+
+// ✅ 再插回原本 item（包含 children）
+list.splice(index, 0, item);
+
+  save();
+
+  // ✅ 重新畫畫面
+  renderProject();
+  renderWeekly();
+  renderGlobal();
+
+}
+
+function undoDelete(){
+  if(!lastDeletedProject) return;
+
+  db.splice(lastDeletedProject.index, 0, lastDeletedProject.data);
+
+  lastDeletedProject = null;
+
+  save();
+  render();
+  renderGlobal();
+}
+
+function getAllItems(list){
+  let result = [];
+
+  list.forEach(it => {
+    result.push(it);
+
+    if(it.children && it.children.length){
+      result = result.concat(getAllItems(it.children));
+    }
+  });
+
+  return result;
+}
+
+function getPaths(list){
+
+  let result = [];
+
+  function dfs(node, path){
+
+    // ✅ 加自己
+    path.push(node);
+
+    // ✅ 到底（沒有 children）
+    if(!node.children || node.children.length === 0){
+
+      // ✅ 存一條完整路徑
+      result.push([...path]);
+
+    }else{
+
+      // ✅ 往下
+      node.children.forEach(child=>{
+        dfs(child, path);
+      });
+
+    }
+
+    // ✅ 回上一層
+    path.pop();
+  }
+
+  // ✅ 每個 root 開始
+  list.forEach(root=>{
+    dfs(root, []);
+  });
+
+  return result;
+}
+
+function packBars(bars){
+
+  bars.sort((a,b) => a.start - b.start);
+
+  let lanes = [];
+
+  bars.forEach(b => {
+
+    let placed = false;
+
+    for(let i=0;i<lanes.length;i++){
+      if(lanes[i] < b.start){
+        lanes[i] = b.end;
+        b.lane = i;
+        placed = true;
+        break;
+      }
+    }
+
+    if(!placed){
+      lanes.push(b.end);
+      b.lane = lanes.length - 1;
+    }
+
+  });
+
+  return {
+    bars: bars,
+    laneCount: lanes.length
+  };
+}
+
+function prevYear(){
+  currentYear--;
+  renderWeekly();
+}
+
+function nextYear(){
+  currentYear++;
+  renderWeekly();
+}
+
+function renderWeekly(){
+  let area = document.getElementById('weekly');
+  area.innerHTML = '';
+
+  let currentWeek = getCurrentWeekNumber();
+  
+// ✅  自動 scroll 到當週
+setTimeout(() => {
+  let cellWidth = 40;
+  let labelWidth = 200;
+
+  let scrollX = (currentWeek - 1) * cellWidth;
+
+  let scrollContainer = document.querySelector('.weekly-scroll');
+
+  if(scrollContainer){
+    scrollContainer.scrollLeft = scrollX;
+  }
+}, 0);
+
+// ✅ 年份控制列
+area.innerHTML = `
+  <div style="display:flex; justify-content:center; align-items:center; gap:10px;">
+    <button onclick="prevYear()">◀</button>
+    <h3 style="margin:0;">${currentYear} - Weekly Gantt</h3>
+    <button onclick="nextYear()">▶</button>
+  </div>
+`;
+
+let scroll = document.createElement('div');
+scroll.className = 'weekly-scroll';
+scroll.style.position = 'relative';
+
+area.appendChild(scroll);
+
+let highlightCol = document.createElement('div');
+
+let cellWidth = 40;
+let labelWidth = 200;
+
+let left = labelWidth + (currentWeek - 1) * cellWidth;
+
+highlightCol.style.position = 'absolute';
+highlightCol.style.top = '0';
+highlightCol.style.left = left + 'px';
+highlightCol.style.width = cellWidth + 'px';
+highlightCol.style.height = '100%';
+
+// ✅ 顏色
+highlightCol.style.background = '#FFF9DB';
+
+// ✅ 層級（在 grid 下、bar 上）
+highlightCol.style.zIndex = '0';
+
+scroll.appendChild(highlightCol);
+
+// ✅ ✅ hover line（時間指示線）
+let hoverLine = document.createElement('div');
+hoverLine.style.position = 'absolute';
+hoverLine.style.top = '0';
+hoverLine.style.height = '100%';
+hoverLine.style.background = 'rgba(120,120,120,0.4)';
+hoverLine.style.width = '1px';
+hoverLine.style.boxShadow = '0 0 4px rgba(0,0,0,0.2)';
+hoverLine.style.pointerEvents = 'none';
+hoverLine.style.display = 'none';
+scroll.appendChild(hoverLine);
+
+  // ✅ Header（WW1~WW52）
+  let header = document.createElement('div');
+  header.style.display = 'grid';
+  header.style.gridTemplateColumns = '200px repeat(52, 40px)';
+  header.style.width = 'max-content'; 
+  header.style.fontSize = '10px';
+header.style.position = 'sticky';
+header.style.top = '0';
+header.style.zIndex = '20';
+header.style.background = '#fff';
+
+let empty = document.createElement('div');
+empty.style.position = 'sticky';
+empty.style.left = '0';
+empty.style.background = '#fff';
+empty.style.zIndex = '11';
+
+empty.style.minWidth = '200px';
+empty.style.maxWidth = '200px';
+empty.style.flexShrink = '0';
+  header.appendChild(empty);
+
+for(let i=1;i<=52;i++){
+  let w = document.createElement('div');
+  w.textContent = 'W'+i;
+  w.style.textAlign = 'center';
+  header.appendChild(w);
+}
+
+  scroll.appendChild(header);
+
+let rows = {};
+
+db.forEach(p=>{
+  if(!passFilter(p)) return;
+  if(p.status==='done') return;
+  p.layers?.forEach((l, li)=>{
+
+    let flowName = p.name + ' - ' + (p.layerNames?.[li] || 'Flow');
+
+    let color = p.color;
+
+    // ✅ 如果這個flow還沒建立，就先建立
+    if(!rows[flowName]){
+      rows[flowName] = {
+        name: flowName,
+        rows: [],
+        color: color
+      };
+    }
+
+let paths = getPaths(l);
+
+paths.forEach(path=>{
+
+  let rowBars = [];
+
+  path.forEach(it=>{
+
+    if(!it.year){
+      it.year = new Date().getFullYear();
+    }
+
+ 
+if(it.startWeek && it.endWeek){
+
+  // ✅ ✅ 正確跨年判斷
+  if(it.startWeek <= it.endWeek){
+
+    if(it.year === currentYear){
+      rowBars.push({
+        name: it.name,
+        start: it.startWeek,
+        end: it.endWeek
+      });
+    }
+
+  }else{
+
+    if(it.year === currentYear){
+      rowBars.push({
+        name: it.name,
+        start: it.startWeek,
+        end: 52
+      });
+    }
+
+    if(it.year + 1 === currentYear){
+      rowBars.push({
+        name: it.name,
+        start: 1,
+        end: it.endWeek
+      });
+    }
+
+  }
+
+    }
+
+  });
+
+  rows[flowName].rows.push(rowBars);
+
+});
+
+
+}); 
+}); 
+
+  // ✅ 畫每一列
+  Object.values(rows).forEach(r=>{
+
+    let row = document.createElement('div');
+    row.style.display = 'grid';
+    row.style.gridTemplateColumns = '200px repeat(52, 40px)';
+    row.style.marginBottom = '4px';
+
+    // ✅ 左側名稱
+    let label = document.createElement('div');
+    label.textContent = r.name;
+    label.style.fontSize = '12px';
+    label.style.width = '200px';
+    label.style.fontWeight = '600';
+
+label.style.position = 'sticky';
+label.style.left = '0';
+
+label.style.background = '#fff';
+label.style.zIndex = '10';          // ✅ 提高層級（關鍵）
+
+label.style.minWidth = '200px';     // ✅ 固定寬度（非常重要）
+label.style.maxWidth = '200px';     // ✅ 防止被壓縮
+label.style.flexShrink = '0';
+label.style.boxShadow = '2px 0 5px rgba(0,0,0,0.05)';  // ✅ 邊界陰影（遮蓋感）
+
+label.style.paddingRight = '8px';
+label.style.display = 'flex';
+label.style.alignItems = 'center';
+
+    row.appendChild(label);
+
+// ✅ 建立 grid（只畫底格，不畫 bar）
+let grid = document.createElement('div');
+grid.style.display = 'grid';
+grid.style.gridTemplateColumns = 'repeat(52, 40px)';
+grid.style.position = 'relative';
+
+// ✅ 畫 52 格
+for(let i=1;i<=52;i++){
+  let cell = document.createElement('div');
+  cell.style.height = '18px';
+  cell.style.borderRight = '1px solid #eee';
+  grid.appendChild(cell);
+}
+
+row.appendChild(grid);
+
+// ✅ ✅ 改成「每個 item 畫一條 bar」
+let cellWidth = 40;
+let labelWidth = 200;
+let rowHeight = 20;
+
+// ✅ row 必須是 relative（關鍵）
+row.style.position = 'relative';
+
+// ✅ 動態高度（避免 bar 被擠）
+row.style.height = (r.rows.length * rowHeight + 10) + 'px';
+
+r.rows.forEach((rowBars, rowIndex) => {
+
+  rowBars.forEach(b => {
+
+    let bar = document.createElement('div');
+
+    let left = labelWidth + (b.start - 1) * cellWidth;
+    let width = (b.end - b.start + 1) * cellWidth;
+
+    // ✅ 重點：用 rowIndex，不是 idx
+    let top = 4 + rowIndex * rowHeight;
+
+    bar.style.position = 'absolute';
+    bar.style.left = left + 'px';
+    bar.style.width = width + 'px';
+    bar.style.top = top + 'px';
+    bar.style.height = '14px';
+
+    bar.style.background = r.color;
+    bar.style.borderRadius = '0px';
+    bar.style.opacity = '0.9';
+
+    bar.style.borderLeft = '2px solid #333';
+    bar.style.borderRight = '2px solid #333';
+
+    // ✅ 文字
+    let label = document.createElement('div');
+    label.textContent = b.name;
+
+    label.style.position = 'absolute';
+    label.style.left = (left + width / 2) + 'px';
+    label.style.top = (top + 2) + 'px';
+    label.style.transform = 'translateX(-50%)';
+    label.style.fontSize = '10px';
+    
+label.style.whiteSpace = 'nowrap';
+label.style.overflow = 'hidden';
+label.style.textOverflow = 'ellipsis';
+label.style.maxWidth = width + 'px';
+label.title = b.name;
+label.style.userSelect = 'none';
+    row.appendChild(bar);
+    row.appendChild(label);
+
+  });
+
+});
+
+row.style.position = 'relative';
+
+    scroll.appendChild(row);
+  });
+
+scroll.addEventListener('mousemove', (e) => {
+
+  const rect = scroll.getBoundingClientRect();
+  const x = e.clientX - rect.left + scroll.scrollLeft;
+
+  hoverLine.style.left = x + 'px';
+  hoverLine.style.display = 'block';
+});
+
+scroll.addEventListener('mouseleave', () => {
+  hoverLine.style.display = 'none';
+});
+
+}
+
+function createFilterMenu(values, selected, onChange){
+
+  let box = document.createElement('div');
+
+  box.style.position = 'absolute';
+  box.style.background = '#fff';
+  box.style.border = '1px solid #ddd';
+  box.style.borderRadius = '8px';
+  box.style.padding = '8px';
+  box.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+  box.style.zIndex = '9999';
+  box.style.width = '240px';
+
+  // ✅ search
+  let search = document.createElement('input');
+  search.placeholder = 'search...';
+  search.style.width = '100%';
+  search.style.marginBottom = '6px';
+
+  box.appendChild(search);
+
+  let list = document.createElement('div');
+  list.style.maxHeight = '200px';
+  list.style.overflowY = 'auto';
+
+  function renderList(keyword=''){
+    list.innerHTML = '';
+
+    values
+      .filter(v => v.toLowerCase().includes(keyword))
+      .forEach(v => {
+
+        let row = document.createElement('label');
+        row.style.display = 'flex';
+        row.style.alignItems = 'center';
+        row.style.gap = '4px';
+   row.style.padding = '4px 0';
+        let cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.checked = selected.includes(v);
+
+        cb.onchange = ()=>{
+          if(cb.checked){
+            if(!selected.includes(v)) selected.push(v);
+          }else{
+            selected = selected.filter(x=>x!==v);
+          }
+
+          onChange(selected);
+        };
+
+        let text = document.createElement('span');
+        text.textContent = v;
+text.style.fontSize = '14px';
+text.style.whiteSpace = 'nowrap';
+text.style.overflow = 'hidden';
+text.style.textOverflow = 'ellipsis';
+
+        row.append(cb, text);
+        list.appendChild(row);
+      });
+  }
+
+  search.oninput = ()=>{
+    renderList(search.value.toLowerCase());
+  };
+
+  renderList();
+
+  box.appendChild(list);
+
+  // ✅ 點外面關閉
+  setTimeout(()=>{
+    document.addEventListener('click', function close(e){
+      if(!box.contains(e.target)){
+        box.remove();
+        document.removeEventListener('click', close);
+      }
+    });
+  });
+
+  return box;
+}
+
+render();
+renderGlobal();
+renderWeekly();
+
+document.addEventListener('keydown', (e) => {
+
+  // ✅ Ctrl (Windows) 或 Command (Mac) + Z
+  if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+  if (mode !== 'plan') return;
+     if (!modal || modal.style.display !== 'flex') return;
+
+    // ✅ 避免在 input 裡誤觸
+    if (
+      document.activeElement.tagName === 'INPUT' ||
+      document.activeElement.tagName === 'TEXTAREA'
+    ){
+      return;
+    }
+
+    e.preventDefault();
+
+    // ✅ 呼叫 undo
+    undoLastItem();
+  }
+
+});
+
+// ✅  Todo系統
+window.addEventListener('DOMContentLoaded', () => {
+
+  const btn = document.getElementById('todoBtn');
+  const panel = document.getElementById('todoPanel');
+ const list = document.getElementById('todoList');
+
+// ✅ Todo DB
+let todoDB = JSON.parse(localStorage.getItem('TODO_DB') || '[]');
+
+  btn.onclick = () => {
+    panel.classList.toggle('open');
+  };
+
+  // ✅  iPhone Todo
+
+function createTodoItem(value='', checked=false){
+
+  let row = document.createElement('div');
+  row.style.display = 'flex';
+  row.style.alignItems = 'center';
+  row.style.marginBottom = '6px';
+  row.style.gap = '6px';
+
+  let check = document.createElement('input');
+  check.type = 'checkbox';
+  check.checked = checked;
+
+  let input = document.createElement('input');
+  input.type = 'text';
+  input.value = value;
+  input.style.flex = '1';
+  input.style.border = 'none';
+  input.style.outline = 'none';
+  input.style.background = 'transparent';
+  row._input = input;
+  row._check = check;
+  let del = document.createElement('div');
+  del.textContent = '✕';
+  del.style.cursor = 'pointer';
+
+  // ✅ 存資料
+ 
+function saveDB(){
+
+  let data = [];
+
+  Array.from(list.children).forEach(r => {
+
+    let txt = r._input.value;
+    let chk = r._check.checked;
+
+    if(txt.trim() !== ''){
+      data.push({text: txt, done: chk});
+    }
+
+  });
+
+  localStorage.setItem('TODO_DB', JSON.stringify(data));
+}
+
+  // ✅ 勾選
+  check.onchange = () => {
+    if(check.checked){
+      input.style.textDecoration = 'line-through';
+      input.style.color = '#999';
+    }else{
+      input.style.textDecoration = 'none';
+      input.style.color = '#000';
+    }
+    saveDB();
+  };
+
+  // ✅ Enter 新增
+  input.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter'){
+      let newRow = createTodoItem('');
+      list.appendChild(newRow);
+      newRow.querySelector('input').focus();
+      saveDB();
+    }
+  });
+
+  // ✅ 輸入同步
+  input.oninput = saveDB;
+
+  // ✅ 刪除
+  del.onclick = () => {
+    row.remove();
+    saveDB();
+  };
+
+  // ✅ 初始狀態
+  if(checked){
+    input.style.textDecoration = 'line-through';
+    input.style.color = '#999';
+  }
+
+  row.append(check, input, del);
+  return row;
+}
+
+if(todoDB.length === 0){
+  list.appendChild(createTodoItem());
+}else{
+  todoDB.forEach(item => {
+    list.appendChild(createTodoItem(item.text, item.done));
+  });
+}
+
+});  
+
+</script>
+<!-- ✅ 🦖 Todo Button -->
+<div id="todoBtn">🦖</div>
+
+<!-- ✅  Todo Panel -->
+<div id="todoPanel">
+  <h3 style="margin:0 0 10px 0;">Todo</h3>
+  <div id="todoList"></div>
+</div>
+</div>
+<!-- ✅ Firebase -->
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+const firebaseConfig = {
+
+  apiKey: "AIzaSyB9Mu4vx_HBQEif3CUFlHEfsw5im_fIA2k",
+
+  authDomain: "rqe-project-system-by-lemon-li.firebaseapp.com",
+
+  projectId: "rqe-project-system-by-lemon-li",
+
+  storageBucket: "rqe-project-system-by-lemon-li.firebasestorage.app",
+
+  messagingSenderId: "795125228001",
+
+  appId: "1:795125228001:web:c8367fe763f371a7d4b2a0",
+
+  measurementId: "G-X9CS51RMM5"
+
+};
+
+const app = initializeApp(firebaseConfig);
+
+const auth = getAuth(app);
+
+const firestore = getFirestore(app);
+
+window.auth = auth;
+window.firestore = firestore;
+
+window.doc = doc;
+window.getDoc = getDoc;
+window.setDoc = setDoc;
+window.currentUser = null;
+window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+window.onAuthStateChanged = onAuthStateChanged;
+console.log("✅ Firebase Connected");
+
+</script>
+<script>
+
+window.addEventListener("DOMContentLoaded", () => {
+
+  document.getElementById("loginBtn").onclick = async () => {
+
+    const email =
+      document.getElementById("loginEmail").value.trim();
+
+    const password =
+      document.getElementById("loginPassword").value;
+
+    try{
+
+      await window.signInWithEmailAndPassword(
+        window.auth,
+        email,
+        password
+      );
+
+    }catch(err){
+
+      console.error(err);
+
+      alert(
+        "Login failed\n\n" +
+        err.message
+      );
+
+    }
+
+  };
+
+window.onAuthStateChanged(
+  window.auth,
+  async (user) => {
+
+    if(!user) return;
+
+    window.currentUser = user;
+
+    console.log("Login Success");
+    console.log("UID =", user.uid);
+
+    try{
+
+      const docRef = window.doc(
+        window.firestore,
+        "users",
+        user.uid
+      );
+
+      const snap = await window.getDoc(docRef);
+
+      if(
+  snap.exists() &&
+  snap.data().projectData
+){
+
+  db = JSON.parse(
+    snap.data().projectData
+  );
+
+}else{
+
+  db = [];
+
+}
+
+        console.log(
+          "✅ Firestore Data Loaded"
+        );
+
+    }catch(err){
+
+      console.error(
+        "Load Failed",
+        err
+      );
+
+    }
+
+    render();
+    renderGlobal();
+    renderWeekly();
+
+    document.getElementById("loginPage").style.display = "none";
+
+    document.getElementById("app").style.display = "block";
+
+  }
+);
+
+});
+
+</script>
+</body>
+</html>
