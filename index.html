@@ -2258,7 +2258,18 @@ if(mode==='info'){
     'Tester / Handler':'',
     'SOT':''
   };
+// ✅ 舊欄位轉移到新欄位
+if(
+    p.info['PE / TE owner'] !== undefined &&
+    p.info['PE / TE / LTE owner'] === undefined
+){
+    p.info['PE / TE / LTE owner']
+        = p.info['PE / TE owner'];
 
+    delete p.info['PE / TE owner'];
+
+    save();
+}
   for(let key in DEFAULT_INFO){
     if(!(key in p.info)){
       p.info[key] = '';
@@ -3378,7 +3389,10 @@ if(mode === 'ft'){
 
   // ========= input =========
   let thRaw = p.info?.['Tester / Handler'] || '';
-  let [defaultTester, defaultHandler] = thRaw.split('/').map(x => x?.trim() || '');
+let thArr = thRaw.split('/');
+
+let defaultTester = thArr[0]?.trim() || '';
+let defaultHandler = thArr[1]?.trim() || '';
 
   let inputBox = document.createElement('div');
   inputBox.style.display = 'flex';
@@ -3397,12 +3411,13 @@ if(mode === 'ft'){
   let typeInput = document.createElement('input');
   typeInput.placeholder = 'type name';
 
-  let testerInput = document.createElement('input');
-  testerInput.value = defaultTester;
+let testerInput = document.createElement('input');
+testerInput.value = defaultTester;
+testerInput.placeholder = 'tester';
 
-  let handlerInput = document.createElement('input');
-  handlerInput.value = defaultHandler;
-  handlerInput.placeholder = 'handler';
+let handlerInput = document.createElement('input');
+handlerInput.value = defaultHandler;
+handlerInput.placeholder = 'handler';
 
   let yearInput = document.createElement('input');
   yearInput.type = 'number';
@@ -3509,7 +3524,8 @@ p.ft.forEach(r=>{
   // ========= header =========
   let header = document.createElement('div');
   header.style.display = 'grid';
-  header.style.gridTemplateColumns = `200px repeat(${activeWeeks.length}, 60px) 40px`;
+  header.style.gridTemplateColumns =
+`30px 200px repeat(${activeWeeks.length}, 60px) 40px`;
   header.style.marginBottom = '6px';
 
   header.appendChild(document.createElement('div'));
@@ -3539,15 +3555,37 @@ Object.entries(group).forEach(([type,data])=>{
     let row = document.createElement('div');
 
     row.style.display = 'grid';
-    row.style.gridTemplateColumns =
-      `200px repeat(${activeWeeks.length}, 60px) 40px`;
+row.style.gridTemplateColumns =
+`30px 200px repeat(${activeWeeks.length}, 60px) 40px`;
 
     row.style.marginBottom = '6px';
 
-    let label = document.createElement('div');
+let delBtn = document.createElement('div');
+delBtn.textContent = '✕';
+delBtn.style.cursor = 'pointer';
+delBtn.style.color = '#ef4444';
+delBtn.style.fontWeight = 'bold';
+delBtn.style.textAlign = 'center';
 
-    let typeText = document.createElement('div');
-    typeText.textContent = type;
+delBtn.onclick = () => {
+
+if(!confirm(`Delete FT item "${type}" ?`)){
+return;
+}
+
+p.ft = p.ft.filter(x =>
+x.type !== type
+);
+
+save();
+renderProject();
+
+};
+
+let label = document.createElement('div');
+
+let typeText = document.createElement('div');
+typeText.textContent = type;
     typeText.style.fontWeight = '600';
 
     let subText = document.createElement('div');
@@ -3564,10 +3602,11 @@ Object.entries(group).forEach(([type,data])=>{
     labelWrap.style.justifyContent = 'space-between';
     labelWrap.style.alignItems = 'center';
     labelWrap.style.paddingRight = '12px';
+row.appendChild(delBtn);
 
-    row.appendChild(labelWrap);
+row.appendChild(labelWrap);
 
-    labelWrap.appendChild(label);
+labelWrap.appendChild(label);
 
     activeWeeks.forEach(w=>{
 
