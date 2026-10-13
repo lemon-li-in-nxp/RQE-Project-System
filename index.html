@@ -2258,18 +2258,7 @@ if(mode==='info'){
     'Tester / Handler':'',
     'SOT':''
   };
-// ✅ 舊欄位轉移到新欄位
-if(
-    p.info['PE / TE owner'] !== undefined &&
-    p.info['PE / TE / LTE owner'] === undefined
-){
-    p.info['PE / TE / LTE owner']
-        = p.info['PE / TE owner'];
 
-    delete p.info['PE / TE owner'];
-
-    save();
-}
   for(let key in DEFAULT_INFO){
     if(!(key in p.info)){
       p.info[key] = '';
@@ -3389,10 +3378,7 @@ if(mode === 'ft'){
 
   // ========= input =========
   let thRaw = p.info?.['Tester / Handler'] || '';
-let thArr = thRaw.split('/');
-
-let defaultTester = thArr[0]?.trim() || '';
-let defaultHandler = thArr[1]?.trim() || '';
+  let [defaultTester, defaultHandler] = thRaw.split('/').map(x => x?.trim() || '');
 
   let inputBox = document.createElement('div');
   inputBox.style.display = 'flex';
@@ -3528,7 +3514,8 @@ p.ft.forEach(r=>{
 `30px 200px repeat(${activeWeeks.length}, 60px) 40px`;
   header.style.marginBottom = '6px';
 
-  header.appendChild(document.createElement('div'));
+header.appendChild(document.createElement('div')); // delete欄
+header.appendChild(document.createElement('div')); // type/tester欄
 
 activeWeeks.forEach(w=>{
   let c = document.createElement('div');
