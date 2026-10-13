@@ -3017,17 +3017,25 @@ title.oninput = () => {
   };
 
   // ✅ 刪除邏輯
-  del.onclick = () => {
+del.onclick = () => {
 
-    let index = p.noteData.system.indexOf(item);
+  if(
+    !confirm(
+      `Delete this item?\n\n${item.text}`
+    )
+  ){
+    return;
+  }
 
-    if(index !== -1){
-      p.noteData.system.splice(index, 1);
-    }
+  let index = p.noteData.system.indexOf(item);
 
-    save();
-    renderProject();   // ✅ 重新畫面
-  };
+  if(index !== -1){
+    p.noteData.system.splice(index, 1);
+  }
+
+  save();
+  renderProject();
+};
 
   row.append(checkbox, title, del);
   systemBox.appendChild(row);
@@ -3162,13 +3170,25 @@ text.oninput = () => {
   row.onmouseenter = () => del.style.opacity = '1';
   row.onmouseleave = () => del.style.opacity = '0';
 
-  del.onclick = () => {
-    let index = p.noteData.action.indexOf(item);
-    if(index !== -1) p.noteData.action.splice(index, 1);
+del.onclick = () => {
 
-    save();
-    renderProject();
-  };
+  if(
+    !confirm(
+      `Delete this item?\n\n${item.text}`
+    )
+  ){
+    return;
+  }
+
+  let index = p.noteData.action.indexOf(item);
+
+  if(index !== -1){
+    p.noteData.action.splice(index, 1);
+  }
+
+  save();
+  renderProject();
+};
 
   row.append(checkbox, text, del);
   actionBox.appendChild(row);
@@ -3288,13 +3308,25 @@ p.noteData.trial.forEach(item => {
   row.onmouseenter = () => del.style.opacity = '1';
   row.onmouseleave = () => del.style.opacity = '0';
 
-  del.onclick = () => {
-    let index = p.noteData.trial.indexOf(item);
-    if(index !== -1) p.noteData.trial.splice(index, 1);
+del.onclick = () => {
 
-    save();
-    renderProject();
-  };
+  if(
+    !confirm(
+      `Delete this item?\n\n${item.text}`
+    )
+  ){
+    return;
+  }
+
+  let index = p.noteData.trial.indexOf(item);
+
+  if(index !== -1){
+    p.noteData.trial.splice(index, 1);
+  }
+
+  save();
+  renderProject();
+};
 
   row.append(checkbox, text, del);
   trialBox.appendChild(row);
